@@ -1,3 +1,6 @@
+const size_t MAXCMDSIZE    = 100;
+extern const size_t NUMOFNAMES;
+
 enum OP
 {
     UnknownOp = 0,
@@ -46,4 +49,23 @@ struct Node
     Var    var;
     Node*  left;
     Node*  right;
+};
+
+enum nameType 
+{
+    KEY_TYPE  = 1,
+    VAR_TYPE  = 2,
+    FUNC_TYPE = 3,
+};
+
+struct Name
+{
+    char* name;
+    nameType type;
+};
+
+struct Utility
+{
+    Node** tokenArray;
+    Name* nameTable;
 };

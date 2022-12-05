@@ -20,7 +20,6 @@ Node* getN (Node*** tokenArray)
     assert ((***tokenArray).type == Num_t);
 
     val = (***tokenArray).numValue;
-    printf ("VAL %lf\n", val);
     *tokenArray += 1;
 
 
@@ -106,7 +105,7 @@ Node* getPW (Node*** tokenArray)
         return val;
     }
 
-    return val;
+   return val;
 }
 
 Node* getVar (Node*** tokenArray)

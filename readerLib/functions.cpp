@@ -3,9 +3,15 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <cstddef>
+#include "../common.h"
 
 #include "functions.h"
+
+extern FILE* LOGFILEPTR;
+const char* ShortCMD       = "+-k*/^csln(){};";
+const char   GraphFile[20] = "GraphFile.txt";
 
 size_t fileSize (FILE* file)
 {
@@ -48,6 +54,26 @@ int textToStr(char* text, size_t* numberOfLines)
     }
     
     text[i] = '\n';
+//    fprintf(stderr, "number of lines = %lu\n", *numberOfLines);
+
+    return 0;
+}
+
+int strToText(char* text, size_t* numberOfLines)
+{
+    ASSERT(text != nullptr);
+
+    size_t i = 0; 
+    for (; text[i] != '\n'; i++) 
+    {
+        if (text[i] == '\0')
+        {
+            *numberOfLines += 1;
+            text[i] = '\n';
+        }
+    }
+    
+    text[i] = '\0';
 //    fprintf(stderr, "number of lines = %lu\n", *numberOfLines);
 
     return 0;
@@ -105,10 +131,163 @@ int readFileToLinesStruct(FILE* openedFile, InputFile* inputFile)
     ASSERT(openedFile != nullptr);
     
     readFile(openedFile, &(inputFile->text));
+    char* text = inputFile->text;
     textToStr(inputFile->text, &(inputFile->numberOfLines));
     splitIntoLines(inputFile);
+    strToText (inputFile->text, &(inputFile->numberOfLines));
     
     return 0;
+}
+
+void treeDump (Node* node, const char* str, ...)
+{
+    fprintf(LOGFILEPTR, "<hr>\n");
+
+    va_list argPtr = nullptr;
+    va_start (argPtr, str);
+
+    fprintf (LOGFILEPTR, "<h2>");
+    vfprintf (LOGFILEPTR, str, argPtr);
+    fprintf (LOGFILEPTR, "</h2>\n");
+    
+    makeGraph (node);
+    static int picVersion = 0;
+    fprintf (LOGFILEPTR, "<img src = \"src/pic%d.svg\"/>\n", picVersion++);
+
+    return; 
+}
+
+#define dumpprint(...) fprintf(GraphFilePtr, __VA_ARGS__);
+void treeGraph (const Node* node, FILE* GraphFilePtr)
+{
+    assert (node         != nullptr);
+    assert (GraphFilePtr != nullptr);
+
+
+    if (node->left)
+    {
+        dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"{ %d | ",
+                    node->left, node->left->type);
+
+        switch (node->left->type)
+        {
+            case OP_t: 
+                dumpprint ("\'%c\' }", ShortCMD[node->left->opValue - 1]);
+                break;
+
+            case Num_t: 
+                dumpprint ("%lf }", node->left->numValue); 
+                break;
+
+            case Var_t:
+                dumpprint ("%s }", node->left->var.varName);
+                break;
+
+            case Unknown:
+                dumpprint ("%s}", node->left->Name);
+                break;
+
+            default:
+                fprintf (stderr, "%d\n", node->left->type);
+                assert (0);
+        }
+        dumpprint (" \"];\n");
+
+        dumpprint ("    nd%p -> nd%p;\n", node, node->left);
+
+        treeGraph (node->left, GraphFilePtr);
+    }
+
+    if (node->right)
+    {
+        dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\" { %d |",
+                    node->right, node->right->type);
+
+        switch (node->right->type)
+        {
+            case OP_t: 
+                dumpprint ("\'%c\' }", ShortCMD[node->right->opValue - 1]);
+                break;
+
+            case Num_t: 
+                dumpprint ("%lf }", node->right->numValue); 
+                break;
+
+            case Var_t:
+                dumpprint ("%s }", node->right->var.varName);
+                break;
+
+            case Unknown:
+                dumpprint ("%s }", node->right->Name);
+                break;
+
+            default:
+                fprintf (stderr, "%d\n", node->right->type);
+                assert (0);
+
+        }
+        dumpprint (" \"];\n");
+
+
+        dumpprint ("    nd%p -> nd%p;\n", node, node->right);
+
+        treeGraph (node->right, GraphFilePtr);
+    }
+
+    return;
+}
+
+void makeGraph (Node* node)
+{
+    FILE* GraphFilePtr = fopen(GraphFile, "w");
+    assert (node != nullptr);
+    assert (GraphFilePtr != nullptr);
+
+    dumpprint ("digraph MyGraph {\n")
+    dumpprint ("    node [color=black, shape=record, style=\"rounded, filled\"];\n")
+    dumpprint ("    rankdir=TB;\n")
+    dumpprint ("    edge[constraint=true];\n")
+
+    dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"%d\"];\n",
+                node, node->type);
+        dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"{ %d | ",
+                    node, node->type);
+        
+        switch (node->type)
+        {
+            case OP_t: 
+                dumpprint ("\'%c\' }", ShortCMD[node->opValue - 1]);
+                break;
+
+            case Num_t: 
+                dumpprint ("%lf }", node->numValue); 
+                break;
+            
+            case Var_t:
+                dumpprint ("%s }", node->var.varName);
+                break;
+
+            case Unknown:
+                dumpprint ("%s }", node->Name);
+                break;
+
+            default:
+                assert (0);
+        }
+        dumpprint ("\"];\n");
+
+   treeGraph (node, GraphFilePtr);
+
+    dumpprint ("}\n")
+
+    fclose(GraphFilePtr);
+    static int picVersion = 0;
+
+    char buf[MAXCMDSIZE] = "";
+    sprintf(buf, "dot -Tsvg -Gcharset=latin1 GraphFile.txt > src/pic%d.svg", picVersion);
+    picVersion++;
+
+    system (buf);
 }
 
 //Status printArrayInFile(FILE* fileToPrint, InputFile* inputFile)

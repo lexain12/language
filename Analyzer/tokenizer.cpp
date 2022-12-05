@@ -67,16 +67,16 @@ void skipSpaces (char** string)
     }
 }
 
-void getTokens (Node** tokenArray, char* string)
+void getTokens (Utility utils, char* string)
 {
     while (*string != '\0')
     {
         if (isspace (*string))
             skipSpaces (&string);
 
-        else if (strchr ("+-*/^(){}", *string))
+        else if (strchr ("+-*/^(){};", *string))
         {
-            getBOpToken (&tokenArray, &string);
+            getBOpToken (&(utils.tokenArray), &string);
         }
 
         else if (isdigit (*string))
@@ -85,22 +85,22 @@ void getTokens (Node** tokenArray, char* string)
             int numOfScanf = 0;
             sscanf (string, "%lf%n", &number, &numOfScanf);
 
-            *tokenArray = createNum (number);
-            tokenArray++;
+            *(utils.tokenArray) = createNum (number);
+            utils.tokenArray++;
             string += numOfScanf;
         }
 
         else if (isalpha (*string))
         {
-            getOpOrWordToken (&tokenArray, &string);
+            getOpOrWordToken (&(utils.tokenArray), &string, utils);
         }
 
     }
 
-    *tokenArray = nodeCtor ();
+    *(utils.tokenArray) = nodeCtor ();
 }
 
-void getOpOrWordToken (Node*** tokenArray, char** string)
+void getOpOrWordToken (Node*** tokenArray, char** string, Utility utils)
 {
     char* ptr = *string;
 
@@ -133,12 +133,67 @@ void getOpOrWordToken (Node*** tokenArray, char** string)
         char*  data = (char*) calloc (MAXDATASIZE, sizeof(*data));
         int numOfScan = 0;
 
-        sscanf (*string, "%[^()-*+/^{}]%n", data, &numOfScan);
+        sscanf (*string, "%[^()-*+/^{}\n ;]%n", data, &numOfScan);
+
+        if (!tableAdd (data, utils.nameTable))
+        {
+            char* newData = findInTable (data, utils.nameTable);
+            free (data);
+            data = newData;
+        }
+
+        fprintf (stderr, "%s\n", data);
 
         assert (numOfScan != 0);
         *string += numOfScan;
 
         **tokenArray = WORD (data);
         *tokenArray += 1;
+        printf ("Ok\n");
     }
+}
+
+char* findInTable (char* name, Name* table)
+{
+    assert (name != nullptr);
+    assert (table != nullptr);
+
+    for (size_t index = 0; index < NUMOFNAMES && table[index].name; ++index)
+    {
+        if (strcmp (table[index].name, name) == 0)
+        {
+            return table[index].name;
+        }
+    }
+
+    return nullptr;
+}
+
+int tableAdd (char* name, Name* table)
+{
+    assert (name != nullptr);
+    assert (table != nullptr);
+
+    char* nameInTable = findInTable (name, table);
+
+    if (nameInTable)
+    {
+        return 0;
+    }
+
+    else
+    {
+        for (size_t index = 0; index < NUMOFNAMES; ++index)
+        {
+            if (table[index].name == nullptr)
+            {
+                table[index].name = name;
+                return 1;
+            }
+        }
+
+        assert (0);
+        return 0;
+    }
+    
 }

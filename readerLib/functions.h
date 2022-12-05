@@ -59,4 +59,9 @@ size_t fileSize (FILE* file);
 int readFile(FILE* openedFile, char** dest);
 int textToStr(char* text, size_t* numberOfLines);
 int splitIntoLines(InputFile *inputFile);
+int strToText(char* text, size_t* numberOfLines);
+
+void makeGraph (Node* node);
+void treeDump (Node* node, const char* str, ...);
+void treeGraph (const Node* node, FILE* GraphFilePtr);
 

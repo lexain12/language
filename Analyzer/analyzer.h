@@ -3,8 +3,10 @@ extern const size_t MAXDATASIZE;
 //tokenizer
 void getBOpToken (Node*** tokenArray, char** string);
 void skipSpaces (char** string);
-void getOpOrWordToken (Node*** tokenArray, char** string);
-void getTokens (Node** tokenArray, char* string);
+void getOpOrWordToken (Node*** tokenArray, char** string, Utility utils);
+void getTokens (Utility utils, char* string);
+char* findInTable (char* name, Name* table);
+int tableAdd (char* name, Name* table);
 
 //common
 Node* createNode (Type type, OP opValue, double numValue, char* varName, char* Name, Node* left, Node* right);
@@ -36,6 +38,6 @@ Node* getVar (Node*** tokenArray);
 #define RBR()     createNode(       OP_t, OP_RBR, 0, nullptr, nullptr, nullptr, nullptr)
 #define FLB()     createNode(       OP_t, OP_FLB, 0, nullptr, nullptr, nullptr, nullptr)
 #define FRB()     createNode(       OP_t, OP_FRB, 0, nullptr, nullptr, nullptr, nullptr)
-#define WORD(name) createNode(Unknown, UnknownOp, 0, name, nullptr, nullptr, nullptr)
+#define WORD(name) createNode(Unknown, UnknownOp, 0, nullptr, name, nullptr, nullptr)
 #define TER()     createNode(       OP_t, OP_TER, 0, nullptr, nullptr, nullptr, nullptr)
 
