@@ -51,10 +51,6 @@ void getBOpToken (Node*** tokenArray, char** string)
             **tokenArray = TER ();
             break;
 
-        case ',':
-            **tokenArray = COM ();
-            break;
-
         default:
             assert (0);
     }
@@ -78,7 +74,7 @@ void getTokens (Utility utils, char* string)
         if (isspace (*string))
             skipSpaces (&string);
 
-        else if (strchr ("+-*/^(){};,", *string))
+        else if (strchr ("+-*/^(){};", *string))
         {
             getBOpToken (&(utils.tokenArray), &string);
         }
@@ -137,20 +133,23 @@ void getOpOrWordToken (Node*** tokenArray, char** string, Utility utils)
         char*  data = (char*) calloc (MAXDATASIZE, sizeof(*data));
         int numOfScan = 0;
 
-        sscanf (*string, "%[^()-*+/^{}\n ;,]%n", data, &numOfScan);
+        sscanf (*string, "%[^()-*+/^{}\n ;]%n", data, &numOfScan);
 
         if (!tableAdd (data, utils.nameTable.data))
         {
-            Name* newData = findInTable (data, utils.nameTable.data);
+            Name* newData = findInTable (data, utils.nameTable);
             free (data);
             data = newData->name;
         }
+
+        fprintf (stderr, "%s\n", data);
 
         assert (numOfScan != 0);
         *string += numOfScan;
 
         **tokenArray = keyWordCheck (data);
         *tokenArray += 1;
+        printf ("Ok\n");
     }
 }
 
@@ -183,6 +182,7 @@ Node* keyWordCheck (char* data)
 
     else if (strcmp ("technique", data) == 0)
     {
+        printf ("OKOKOKOKKO\n");
         val = WORD(data);
         val->type = Key_t;
     }
@@ -258,7 +258,6 @@ Name* tableAdd (char* name, Name* table)
             if (table[index].name == nullptr)
             {
                 table[index].name = name;
-
                 return table + index;
             }
         }

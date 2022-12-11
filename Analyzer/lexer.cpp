@@ -6,21 +6,28 @@
 #include "../common.h"
 #include "analyzer.h"
 
-Node* getN (Node*** tokenArray)
+Node* getN (Utility* utils)
 {
+
     double val = 0;
     int isMinus = 0;
  
-    if ((***tokenArray).opValue == OP_SUB)
+    if ((**(utils->tokenArray)).opValue == OP_SUB)
     {
          isMinus = 1;
-         *tokenArray += 1;
+         utils->tokenArray += 1;
     }
 
-    assert ((***tokenArray).type == Num_t);
+    if ((**(utils->tokenArray)).type != Num_t)
+    {
+        if (isMinus) utils->tokenArray -= 1;
+        fprintf (stderr, "nullptr\n");
 
-    val = (***tokenArray).numValue;
-    *tokenArray += 1;
+        return nullptr;
+    }
+
+    val = (**(utils->tokenArray)).numValue;
+    utils->tokenArray += 1;
 
 
      if (isMinus) 
@@ -29,136 +36,493 @@ Node* getN (Node*** tokenArray)
         return createNum (val);
 }
 
-Node* getT (Node*** tokenArray)
+Node* getT (Utility* utils)
 {
-    Node* val = getPW (tokenArray);
 
-    while ((***tokenArray).opValue == OP_DIV || (***tokenArray).opValue == OP_MUL)
+    Node* val = getP (utils);
+
+    while ((**(utils->tokenArray)).opValue == OP_DIV || (**(utils->tokenArray)).opValue == OP_MUL)
     {
-        int op = (***tokenArray).opValue;
+        int op = (**(utils->tokenArray)).opValue;
 
-        *tokenArray += 1;
+        utils->tokenArray += 1;
 
-        Node* val2 = getPW (tokenArray);
+        Node* val2 = getP (utils);
 
         if (op == OP_MUL)
             val = MUL (val, val2);            
         else
             val = DIV (val, val2);
+
     }
 
     return val;
 }
 
-Node* getE (Node*** tokenArray)
+Node* getE (Utility* utils)
 {
-    Node* val = getT (tokenArray);
 
-    while ((***tokenArray).opValue == OP_ADD || (***tokenArray).opValue == OP_SUB)
+    assert (utils->tokenArray != nullptr);
+
+    Node* val = getT (utils);
+
+    while ((**(utils->tokenArray)).opValue == OP_ADD || (**(utils->tokenArray)).opValue == OP_SUB)
     {
-        int op = (***tokenArray).opValue;
+        int op = (**(utils->tokenArray)).opValue;
 
-        *tokenArray += 1;
+        utils->tokenArray += 1;
 
-        Node* val2 = getT (tokenArray);
+        Node* val2 = getT (utils);
 
         if (op == OP_ADD)
             val = ADD (val, val2);
         else 
             val = SUB (val, val2);
+
     }
 
     return val;
 }
 
-Node* getP (Node*** tokenArray)
-{ Node* val = nullptr;
-    if ((***tokenArray).opValue == OP_LBR)
-    {
-        *tokenArray += 1;
-        val = getE (tokenArray);
-        assert ((***tokenArray).opValue == OP_RBR);
-        *tokenArray += 1;
-    }
-    else 
-    {
-       val = getUnOP (tokenArray);
-    }
+Node* getP (Utility* utils)
+{ 
 
-    return val;
-}
+    assert (utils->tokenArray != nullptr);
 
-Node* getPW (Node*** tokenArray)
-{
-    Node* val = getP (tokenArray);
-
-    if (**tokenArray == nullptr) 
-    {
-        return val;
-    }
-
-    while ((***tokenArray).opValue == OP_POW)
-    {
-        *tokenArray += 1;
-        val = POW (val, getP (tokenArray));
-
-        return val;
-    }
-
-   return val;
-}
-
-Node* getVar (Node*** tokenArray)
-{
-    assert (tokenArray != nullptr);
     Node* val = nullptr;
 
-    if ((***tokenArray).type == Var_t)
+    if ((**(utils->tokenArray)).opValue == OP_LBR)
     {
-       tableInsert ((***tokenArray).varName);
-       val = VAR((***tokenArray).varName);
-       *tokenArray += 1;
-        
+        utils->tokenArray += 1;
+        val = getE (utils);
+        assert ((**(utils->tokenArray)).opValue == OP_RBR);
+        utils->tokenArray += 1;
+    }
+    else if (val = getVar (utils)) {}
+
+    else if (val = getN (utils)) {}
+
+    else if (val = getFunction (utils)) {}
+
+    return val;
+}
+
+Node* getVar (Utility* utils)
+{
+
+    assert (utils->tokenArray != nullptr);
+    Node* val = nullptr;
+
+    if ((**(utils->tokenArray)).type == Unknown) 
+    {
+        if ((**(utils->tokenArray + 1)).opValue != OP_LBR)
+        {
+
+            val = *(utils->tokenArray);
+            val->type = Var_t;
+            val->var.varName = val->Name;
+
+            utils->tokenArray += 1;
+        }
+        else 
+            return nullptr;
     }
 
     return val;
 }
 
-Node* getUnOP (Node*** tokenArray)
+Node* getFunction (Utility* utils)
 {
-    Node* val  = nullptr;
+    
+    assert (utils->tokenArray != nullptr); 
 
-    if ((***tokenArray).type == OP_t)
+    Node* val = nullptr;
+
+
+    if ((**(utils->tokenArray)).type == Key_t)
     {
-        switch ((***tokenArray).opValue)
+
+        if (strcmp ((**(utils->tokenArray)).Name, "new") == 0)
         {
-            case OP_SIN:
-                *tokenArray += 1;
-                val = SIN (getP (tokenArray));
-                break;
+            utils->tokenArray += 1;
+        }
+        else 
+        {
+            return nullptr;
+        }
+
+        if ((**(utils->tokenArray)).type == Key_t)
+        {
+            if (strcmp ((**(utils->tokenArray)).Name, "technique") == 0)
+            {
+                utils->tokenArray += 1;
+
+                val = *(utils->tokenArray);
+                val->type = Func_t;
+                Name* curName = findInTable (val->Name, utils->nameTable.data);
+
+                curName->type = FUNC_TYPE;
+
+                val = FUNC(val, nullptr);
+
+                utils->tokenArray += 1;
+            }
+            if ((**(utils->tokenArray)).opValue == OP_LBR)
+            {
+                utils->tokenArray += 1;
+
+                if ((**(utils->tokenArray)).type == Key_t)
+                {
+                    Node* curNode = nullptr;
+
+                    if (strcmp ((**(utils->tokenArray)).Name, "var") == 0)
+                    {
+                        utils->tokenArray += 1;
+                        curNode = val->left;
+                        
+                        curNode->left = PARAM(WORD("VAR"), nullptr);
+                        curNode->left->left->type = Key_t;
+                        curNode->left->left->left = getVar (utils);
+
+                        curNode = curNode->left;
+                    }
+
+                    while ((**(utils->tokenArray)).opValue == OP_COM)
+                    {
+                        utils->tokenArray += 1;
+
+                        if (strcmp ((**(utils->tokenArray)).Name, "var") == 0)
+                        {
+                            utils->tokenArray += 1;
+
+                            curNode->right = PARAM(WORD("VAR"), nullptr);
+                            curNode->right->left->type = Key_t;
+                            curNode->right->left->left = getVar (utils);
+                        }
+
+                        curNode = curNode->right;
+                    }
+                }
+                 
+            }
+            else 
+                assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_RBR)
+                utils->tokenArray += 1;
+            else 
+                assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_FLB)
+            {
+                utils->tokenArray += 1;
+
+                val->right = ST(getStatement (utils), nullptr);
+                val->right->type = Key_t;
+
+
+                Node* curNode = val->right;
+                Node* newNode = nullptr;
+
+                while (newNode = getStatement (utils))
+                {
+                    curNode->right = ST(newNode, nullptr);
+                    curNode = curNode->right;
+                }
+            }
+            else assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_FRB)
+            {
+                utils->tokenArray += 1;
+
+                return val;
+            }
+            else assert (0);
             
-            case OP_COS:
-                *tokenArray += 1;
-                val = COS (getP (tokenArray));
-                break;
+        }
+    }
+    else if ((**(utils->tokenArray)).type == Unknown)
+    {
+        char* tokenName = (**(utils->tokenArray)).Name;
+        Name* curName = nullptr;
+
+        if (curName = findInTable (tokenName, utils->nameTable.data))
+        {
+            if (curName->type == FUNC_TYPE)
+            {
+            
+                val = *(utils->tokenArray);
+                val->type = Func_t;
+
+                val = FUNC(val, nullptr);
+
+                val->Name = "CALL";
+
+                utils->tokenArray += 1;
+            }
+            if ((**(utils->tokenArray)).opValue == OP_LBR)
+            {
+                utils->tokenArray += 1;
+
+                Node* curNode = nullptr;
+
+                curNode = val->left;
+                
+                curNode->left = PARAM (getE (utils), nullptr);
+
+                curNode = curNode->left;
+
+                while ((**(utils->tokenArray)).opValue == OP_COM)
+                {
+                    utils->tokenArray += 1;
+
+                    curNode->right = PARAM(getE (utils), nullptr);
+
+                    curNode = curNode->right;
+                }
+            }
+            else 
+                assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_RBR)
+                utils->tokenArray += 1;
+            else 
+                assert (0);
+            
         }
 
     }
-    else if ((***tokenArray).type == Var_t)
+
+
+    return val;
+}
+
+
+Node* getStatement (Utility* utils)
+{
+    
+    if ((**(utils->tokenArray)).type == Unknown && (**(utils->tokenArray)).Name == nullptr)
+        return nullptr;
+
+    Node *val = nullptr;
+
+    if (val = getVar (utils))
     {
-        val = getVar (tokenArray);
+
+        val = EQ(val, getE (utils));
+
+        fprintf (stderr, "POV %d %d\n", val->type, val->opValue);
+
+        if ((**(utils->tokenArray)).opValue == OP_EQ)
+            utils->tokenArray += 1;
+        else 
+            assert (0);
+
+        if ((**(utils->tokenArray)).opValue == OP_TER)
+            utils->tokenArray += 1;
+
+        else 
+            assert (0);
+
+        return val;
     }
-    else if ((***tokenArray).type == Num_t)
+
+    else if (val = getE (utils))
     {
-        val = getN (tokenArray);
+
+        if ((**(utils->tokenArray)).type == OP_t)
+        {
+            if ((**(utils->tokenArray)).opValue == OP_TER)
+            {
+                utils->tokenArray += 1;
+                return val;
+            }
+            else 
+                assert (0);
+        }
+        else 
+            assert (0);
+    }
+
+    else if ((**(utils->tokenArray)).type == Key_t)
+    {
+        if (strcmp ((**(utils->tokenArray)).Name, "return") == 0)
+        {
+            utils->tokenArray += 1;
+            val = WORD("RET");
+            val->type = Key_t;
+            
+
+            val->left = getE (utils);
+
+            if ((**(utils->tokenArray)).opValue == OP_TER)
+                utils->tokenArray += 1;
+            else 
+                assert (0);
+
+            return val;
+        }
+
+        else if (strcmp ((**(utils->tokenArray)).Name, "var") == 0)
+        {
+            utils->tokenArray += 1;
+            val = WORD("VAR");
+            val->type = Key_t;
+
+            val->left = getVar (utils);
+
+            val->right = getE (utils);
+
+            if ((**(utils->tokenArray)).opValue == OP_EQ)
+            {
+                utils->tokenArray += 1;
+
+                if ((**(utils->tokenArray)).opValue == OP_TER)
+                {
+                    utils->tokenArray += 1;
+                    return val;
+                }
+                else 
+                    assert (0);
+            }
+
+            assert (0);
+        }
+
+        else if (strcmp ((**(utils->tokenArray)).Name, "Ccombo!!") == 0)
+        {
+            utils->tokenArray += 1;
+            if ((**(utils->tokenArray)).opValue == OP_LBR)
+            {
+                utils->tokenArray += 1;
+                val = WORD("WHILE");
+                val->type = Key_t;
+                val->left = getE (utils);
+            }
+            else assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_RBR)
+            {
+                utils->tokenArray += 1;
+            }
+            else assert (0);
+            
+            if ((**(utils->tokenArray)).opValue == OP_FLB)
+            {
+                utils->tokenArray += 1;
+
+                val->right = ST(getStatement (utils), nullptr);
+                val->right->type = Key_t;
+
+
+                Node* curNode = val->right;
+                Node* newNode = nullptr;
+
+                while (newNode = getStatement (utils))
+                {
+                    curNode->right = ST(newNode, nullptr);
+                    curNode = curNode->right;
+                }
+            }
+            else assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_FRB)
+            {
+                utils->tokenArray += 1;
+
+                return val;
+            }
+            else assert (0);
+        }
+
+        else if (strcmp ((**(utils->tokenArray)).Name, "right") == 0)
+        {
+            utils->tokenArray += 1;
+            if ((**(utils->tokenArray)).opValue == OP_LBR)
+            {
+                utils->tokenArray += 1;
+                val = WORD("IF");
+                val->type = Key_t;
+                val->left = getE (utils);
+            }
+            else assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_RBR)
+            {
+                utils->tokenArray += 1;
+            }
+            else assert (0);
+            
+            if ((**(utils->tokenArray)).opValue == OP_FLB)
+            {
+                utils->tokenArray += 1;
+
+                val->right = ST(getStatement (utils), nullptr);
+                val->right->type = Key_t;
+
+
+                Node* curNode = val->right;
+                Node* newNode = nullptr;
+
+                while (newNode = getStatement (utils))
+                {
+                    curNode->right = ST(newNode, nullptr);
+                    curNode = curNode->right;
+                }
+            }
+            else assert (0);
+
+            if ((**(utils->tokenArray)).opValue == OP_FRB)
+            {
+                utils->tokenArray += 1;
+
+                return val;
+            }
+            else assert (0);
+        }
+
+        else if (strcmp ((**(utils->tokenArray)).Name, "K.O.") == 0)
+        {
+            utils->tokenArray += 1;
+            val = WORD("RET");
+            val->type = Key_t;
+            
+            val->left = getE (utils);
+            if ((**(utils->tokenArray)).opValue == OP_TER)
+                utils->tokenArray += 1;
+            else assert (0);
+
+            return val;
+        }
+
+        assert (0);
     }
 
     return val;
 }
-Node* getG (Node*** tokenArray) 
+
+Node* getG (Utility* utils) 
 {
-    Node* val = getE (tokenArray);
-    return val;
+
+    assert (utils->tokenArray != nullptr);
+
+    Node* mainNode = getStatement (utils);
+    mainNode = ST(mainNode, nullptr);
+    mainNode->type = Key_t;
+
+    Node* curNode = mainNode;
+    Node* newNode = nullptr;
+
+
+    while (newNode = getStatement (utils))
+    {
+        curNode->right = ST(newNode, nullptr);
+        curNode = curNode->right;
+        curNode->type = Key_t;
+    }
+
+    return mainNode;
 
 }
 
@@ -170,15 +534,5 @@ int power(int base, int n)
         p = p * base;
 
     return p;
-}
-
-int strEqual(const char *l, const char *r)
-{
-    if (l == nullptr || r == nullptr) return 0;
-
-    for (int i = 0; l[i] != '\0' && r[i] != '\0'; i++)
-        if (l[i] != r[i]) return 0;
-
-    return 1;
 }
 

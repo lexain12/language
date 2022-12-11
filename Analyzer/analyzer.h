@@ -1,3 +1,4 @@
+#pragma once
 extern const size_t MAXDATASIZE;
 
 //tokenizer
@@ -5,8 +6,9 @@ void getBOpToken (Node*** tokenArray, char** string);
 void skipSpaces (char** string);
 void getOpOrWordToken (Node*** tokenArray, char** string, Utility utils);
 void getTokens (Utility utils, char* string);
-char* findInTable (char* name, Name* table);
-int tableAdd (char* name, Name* table);
+Name* findInTable (char* name, Name* table);
+Name* tableAdd (char* name, Name* table);
+Node* keyWordCheck (char* data);
 
 //common
 Node* createNode (Type type, OP opValue, double numValue, char* varName, char* Name, Node* left, Node* right);
@@ -15,14 +17,20 @@ Node* nodeCtor ();
 int strEqual(const char *l, const char *r);
 
 //lexer
-Node* getN (Node*** tokenArray);
-Node* getP (Node*** tokenArray);
-Node* getG (Node*** tokenArray);
-Node* getE (Node*** tokenArray);
-Node* getT (Node*** tokenArray);
+Node* getFunction (Utility* utils);
+Node* getStatement (Utility* utils);
+Node* getN (Utility* utils);
+Node* getP (Utility* utils);
+Node* getG (Utility* utils);
+Node* getE (Utility* utils);
+Node* getT (Utility* utils);
 Node* getPW (Node*** tokenArray);
 Node* getUnOP (Node*** tokenArray);
-Node* getVar (Node*** tokenArray);
+Node* getVar (Utility* utils);
+
+//Table Of Names
+Name* tableAdd (char* name, Name* table);
+Name* findInTable (char* name, Name* table);
 
 #define createNum(NUM) createNode(Num_t, UnknownOp, NUM, nullptr, nullptr, nullptr, nullptr)
 #define SUB(left, right) createNode(OP_t, OP_SUB, 0, nullptr, nullptr, left, right)
@@ -40,4 +48,10 @@ Node* getVar (Node*** tokenArray);
 #define FRB()     createNode(       OP_t, OP_FRB, 0, nullptr, nullptr, nullptr, nullptr)
 #define WORD(name) createNode(Unknown, UnknownOp, 0, nullptr, name, nullptr, nullptr)
 #define TER()     createNode(       OP_t, OP_TER, 0, nullptr, nullptr, nullptr, nullptr)
+#define COM()     createNode(       OP_t, OP_COM, 0, nullptr, nullptr, nullptr, nullptr)
+#define VAR()     createNode(      Var_t, UnknownOp, 0, nullptr, nullptr, nullptr, nullptr)
+#define EQ(left, right) createNode(OP_t, OP_EQ,   0, nullptr, nullptr, left, right)
+#define FUNC(left, right) createNode(Func_t, UnknownOp, 0, nullptr, "FUNC", left, right)
+#define ST(left, right) createNode(Key_t, UnknownOp, 0, nullptr, "ST", left, right)
+#define PARAM(left, right) createNode(Key_t, UnknownOp, 0, nullptr, "PARAM", left, right)
 

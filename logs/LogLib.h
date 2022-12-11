@@ -14,7 +14,7 @@ int logprint(double param);
 
 FILE* logOpen(const char*);
 
-FILE* LOGFILEPTR = logOpen(LOGNAME);
+extern FILE* LOGFILEPTR;
 
 #define $ fprintf(LOGFILEPTR, "FILE: %s, Function: %s, line: %d\n", __FILE__, __func__, __LINE__);
 

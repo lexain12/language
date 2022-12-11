@@ -1,3 +1,5 @@
+#pragma once
+#include <cstddef>
 const size_t MAXCMDSIZE    = 100;
 extern const size_t NUMOFNAMES;
 
@@ -18,6 +20,8 @@ enum OP
     OP_FRB    = 13,
     OP_FLB    = 14,
     OP_TER    = 15,
+    OP_EQ     = 16,
+    OP_COM    = 17,
 };
 
 enum Type
@@ -26,6 +30,8 @@ enum Type
     OP_t    = 1,
     Var_t   = 2,
     Num_t   = 3,
+    Key_t   = 4,
+    Func_t  = 5,
 };
 
 enum VarType 
@@ -40,6 +46,13 @@ struct Var
     VarType varType;
 };
 
+enum NameType 
+{
+    KEY_TYPE  = 1,
+    VAR_TYPE  = 2,
+    FUNC_TYPE = 3,
+};
+
 struct Node 
 {
     Type   type;
@@ -51,21 +64,25 @@ struct Node
     Node*  right;
 };
 
-enum nameType 
-{
-    KEY_TYPE  = 1,
-    VAR_TYPE  = 2,
-    FUNC_TYPE = 3,
-};
-
 struct Name
 {
     char* name;
-    nameType type;
+    NameType type;
+    int position;
+};
+
+struct NameTable
+{
+    int numOfVars;
+    Name* data;
 };
 
 struct Utility
 {
     Node** tokenArray;
-    Name* nameTable;
+    NameTable nameTable;
 };
+
+//Table Of Names
+Name* tableAdd (char* name, Name* table);
+Name* findInTable (char* name, Name* table);

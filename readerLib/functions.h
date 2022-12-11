@@ -27,6 +27,7 @@ struct InputFile
     size_t numberOfLines = 0;
     Line*  arrayOfLines  = nullptr;
     char*  text          = nullptr;
+    size_t sizeOfFile    = 0;
 };
 
 int isBigger(const char* line1, const char* line2);

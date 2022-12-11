@@ -1,0 +1,457 @@
+#include "../stack/config.h"
+#include "../common.h"
+#include "../stack/stack.h"
+#include "Writer.h"
+#include <cassert>
+
+static int numberOfLabels = 0;
+
+void createTable (Stack_t* stk)
+{
+    NameTable* newTable = (NameTable*) calloc (1, sizeof (*(newTable)));
+    assert (newTable != nullptr);
+
+    Name* newData = (Name*) calloc (NUMOFNAMES, sizeof(*newData));
+    assert (newData != nullptr);
+
+    newTable->data = newData;
+
+    stackPush (stk, newTable);
+}
+
+void destroyTable (Stack_t* stk)
+{
+    NameTable* oldTable = stackPop (stk);
+
+    free (oldTable);
+}
+
+void parseSt (Node* node, Stack_t* stk, int isLocal, FILE* asmFile)
+{
+
+    fprintf (stderr, "CURNODE %d %d \n", node->type, node->opValue);
+
+    if (isLocal)
+    {
+        if (stk->size > 0)
+            addRelativeShift (stk, stackLast (stk)->numOfVars, asmFile);
+
+        createTable (stk);
+        printf ("CREATED new TABLE\n");
+    }
+
+
+    if (node->left)
+    {
+        fprintf (stderr, "LEFTNODE %d %d\n", node->left->type, node->left->opValue);
+
+        switch (node->left->type)
+        {
+            case OP_t:
+                parseExp (node->left, stk, asmFile);
+                break;
+
+            case Var_t:
+                break;
+
+            case Num_t:
+                parseExp (node->left, stk, asmFile);
+                break;
+
+            case Key_t:
+                printf ("%s\n", node->left->Name);
+                if (strcmp (node->left->Name, "VAR") == 0)
+                    parseVar (node->left, stk, asmFile);
+
+                else if (strcmp (node->left->Name, "IF") == 0)
+                    parseIf (node->left, stk, 1, asmFile);
+
+                else if (strcmp (node->left->Name, "WHILE") == 0)
+                    parseWhile (node->left, stk, 1, asmFile);
+
+                else if (strcmp (node->left->Name, "ST") == 0)
+                    parseSt (node->left, stk, 1, asmFile);
+
+                break;
+
+            case Func_t:
+                parseFunc (node->left, stk, 1, asmFile);
+                break;
+
+            case Unknown:
+                fprintf (stderr, "Writer unknown %s\n", node->Name);
+                assert (0);
+                break;
+
+            default:
+                assert (0);
+        }
+    }
+
+    if (node->right)
+    {
+        fprintf (stderr, "RIGHTNODE %d %d\n", node->right->type, node->right->opValue);
+
+        switch (node->right->type)
+        {
+            case OP_t:
+                parseExp (node->right, stk, asmFile);
+                break;
+
+            case Var_t:
+                break;
+
+            case Num_t:
+                parseExp (node->right, stk, asmFile);
+                break;
+
+            case Key_t:
+                if (strcmp (node->right->Name, "VAR") == 0)
+                    parseVar (node->right, stk, asmFile);
+
+                else if (strcmp (node->right->Name, "IF") == 0)
+                    parseIf (node->right, stk, 0, asmFile);
+
+                else if (strcmp (node->right->Name, "WHILE") == 0)
+                    parseWhile (node->right, stk, 0, asmFile);
+
+                else if (strcmp (node->right->Name, "ST") == 0)
+                    parseSt (node->right, stk, 0, asmFile);
+
+                break;
+
+            case Func_t:
+                parseFunc (node->right, stk, 0, asmFile);
+                break;
+
+            case Unknown:
+                fprintf (stderr, "Writer unknown %s\n", node->Name);
+                assert (0);
+                break;
+
+            default:
+                assert (0);
+        }
+    } 
+
+    if (isLocal)
+    {
+        destroyTable (stk);
+        if (stk->size > 0)
+            addRelativeShift (stk, - stackLast (stk)->numOfVars, asmFile);
+    }
+
+}
+
+void addRelativeShift (Stack_t* stk, int shift, FILE* asmFile)
+{
+    fprintf (asmFile, "\\\\relative shift\n\n");
+    fprintf (asmFile, "    PUSH rax\n");
+    fprintf (asmFile, "    PUSH %d\n", shift);
+    fprintf (asmFile, "    ADD\n");
+    fprintf (asmFile, "    POP rax\n");
+    fprintf (asmFile, "\\\\end of relative shift\n\n");
+}
+
+void parseIf (Node* node, Stack_t* stk, int isLocal, FILE* asmFile)
+{
+    printf ("PARSEIF\n");
+    fprintf (asmFile, "\\\\ if\n\n");
+
+    if (node->left)
+        parseExp (node->left, stk, asmFile);
+    else 
+        assert (0);
+
+    int curLabel = numberOfLabels;
+    numberOfLabels += 1;
+
+    fprintf (asmFile, "    PUSH 0\n");
+    fprintf (asmFile, "    JA :%d\n", curLabel);
+
+    if (node->right)
+    {
+        parseSt (node->right, stk, 1, asmFile); //Maybe mistakes
+    }
+    else 
+        assert (0);
+
+    fprintf (asmFile, "%d:\n", curLabel);
+
+    fprintf (asmFile, "\\\\ end of if\n\n");
+}
+
+void readInitParam (Node* node, Stack_t* stk, FILE* asmFile)
+{
+    if (node->type == Key_t)
+    {
+        if (node->left)
+            parseVar (node->left, stk, asmFile);
+
+        if (node->right)
+            readInitParam (node->right, stk, asmFile);
+    }
+    else 
+        assert (0);
+}
+
+void readCallParam (Node* node, Stack_t* stk, FILE* asmFile)
+{
+    if (node->type == Key_t)
+    {
+        if (node->left)
+            parseExp (node->left, stk, asmFile);
+
+        if (node->right)
+            readCallParam (node->right, stk, asmFile);
+    }
+}
+
+void parseFunc (Node* node, Stack_t* stk, int isLocal, FILE* asmFile)
+{
+
+    fprintf (asmFile, "\\\\FUNC\n\n");
+
+
+    if (strcmp (node->Name, "CALL") == 0)
+    {
+        
+        if (node->left)
+        {
+            if (node->left->left)
+                readCallParam (node->left->left, stk, asmFile);
+
+            if (isLocal)
+            {
+                if (stk->size > 0)
+                    addRelativeShift (stk, stackLast (stk)->numOfVars, asmFile);
+
+                createTable (stk);
+                printf ("CREATED new TABLE\n");
+            }
+
+            fprintf (asmFile, "    CALL :%s\n", node->left->Name);
+
+        if (isLocal)
+        {
+            destroyTable (stk);
+            if (stk->size > 0)
+                addRelativeShift (stk, - stackLast (stk)->numOfVars, asmFile);
+        }
+        }
+
+        else 
+            assert (0);
+
+    }
+    else if (strcmp (node->Name, "FUNC") == 0)
+    {
+
+        if (node->left)
+        {
+            fprintf (asmFile, "%s:\n", node->left->Name);
+            readInitParam (node->left->left, stk, asmFile);
+        }
+        else 
+            assert (0);
+
+        if (node->right)
+            parseSt (node->right, stk, 0, asmFile);
+        else 
+            assert (0);
+
+        fprintf (asmFile, "    RET\n");
+
+    }
+
+    fprintf (asmFile, "\\\\end of FUNC\n\n");
+
+}
+
+void parseWhile (Node* node, Stack_t* stk, int isLocal, FILE* asmFile)
+{
+    printf ("PARSEWHILE\n");
+    fprintf (asmFile, "\\\\ while\n");
+
+    if (node->left)
+        parseExp (node->left, stk, asmFile);
+    else 
+        assert (0);
+
+    int curLabel = numberOfLabels;
+    numberOfLabels += 1;
+    int curLabel2 = numberOfLabels;
+    numberOfLabels += 1;
+
+    fprintf (asmFile, "    POP rbx\n");
+
+    fprintf (asmFile, "%d:\n", curLabel2);
+    fprintf (asmFile, "    PUSH rbx\n");
+    fprintf (asmFile, "    PUSH 0\n");
+    fprintf (asmFile, "    JA :%d\n", curLabel);
+
+    if (node->right)
+    {
+        parseSt (node->right, stk, 1, asmFile); //Maybe mistakes
+    }
+    else 
+        assert (0);
+
+    fprintf (asmFile, "    JMP :%d\n", curLabel2);
+
+    fprintf (asmFile, "%d:\n", curLabel);
+
+    fprintf (asmFile, "\\\\End of While\n\n");
+}
+
+void parseEqual (Node* node, Stack_t* stk, FILE* asmFile)
+{
+    if (node->left)
+    {
+        if (node->left->type != Var_t)
+            assert (0);
+
+        if (node->right)
+        {
+            parseExp (node->right, stk, asmFile);
+        }
+        else 
+            assert (0);
+
+        fprintf (stderr, "Name %s\n", node->var.varName);
+        int pos = findInStack (node->left->var.varName, stk); 
+        fprintf (asmFile, "    POP [rax + %d]\n", pos);
+    }
+    else assert (0);
+}
+
+void parseExp (Node* node, Stack_t* stk, FILE* asmFile)
+{
+    printf("PARSEEXP\n");
+    int pos = -1;
+
+    if (node->opValue == OP_EQ)
+    {
+        parseEqual (node, stk, asmFile);
+        return;
+    }
+
+    if (node->left)
+        parseExp (node->left, stk, asmFile);
+
+    if (node->right)
+        parseExp (node->right, stk, asmFile);
+
+    switch (node->type)
+    {
+        case OP_t:
+            switch (node->opValue)
+            {
+                case OP_ADD:
+                    fprintf (asmFile, "    ADD\n");
+                    break;
+
+                case OP_SUB:
+                    fprintf (asmFile, "    SUB\n");
+                    break;
+
+                case OP_MUL:
+                    fprintf (asmFile, "    MUL\n");
+                    break;
+
+                case OP_DIV:
+                    fprintf (asmFile, "    DIV\n");
+                    break;
+
+                default:
+                    assert (0);
+            }
+
+            break;
+
+        case Num_t:
+            fprintf (asmFile, "    PUSH %lg\n", node->numValue);
+            break;
+
+        case Var_t:
+            fprintf (stderr, "Name %s\n", node->var.varName);
+            pos = findInStack (node->var.varName, stk); 
+            fprintf (asmFile, "    PUSH [rax + %d]\n", pos);
+            break;
+
+        case Func_t:
+            parseFunc (node->right, stk, 1, asmFile);
+            break;
+
+        default: 
+            assert (0);
+
+    }
+
+    fprintf (stderr, "end of parse ex\n");
+}
+
+void tableDump (NameTable* nameTable)
+{
+    for (size_t index = 0; index < nameTable->numOfVars; ++index)
+    {
+        fprintf (stderr, "Name %s pos %d \n", nameTable->data[index].name, nameTable->data[index].position);
+    }
+}
+
+int findInStack (char* name, Stack_t* stk)
+{
+    int pos = 0;
+
+    for (int index = stk->size - 1; index >= 0 ; index--)
+    {
+        fprintf (stderr, "TABLE %d\n", index);
+        fprintf (stderr, "POS %d\n", pos);
+        tableDump (stackLast (stk));
+        if (findInTable (name, stk->data[index]->data))
+        {
+            pos += findInTable (name, stk->data[index]->data)->position;
+            return pos;
+        }
+        else 
+        {
+            pos -= stk->data[index - 1]->numOfVars; 
+        }
+
+    }
+
+    return -1;
+}
+
+void parseVar (Node* node, Stack_t* stk, FILE* asmFile)
+{
+    printf("PARSEVAR\n");
+
+    int pos = 0;
+
+    if (node->left)
+    {
+        NameTable* curTable = stackLast (stk);
+        assert (curTable != nullptr);
+
+        fprintf (stderr, "name in parse var %s\n", node->left->var.varName);
+        Name* name = tableAdd (node->left->var.varName, curTable->data);
+        assert (name != nullptr);
+        curTable->numOfVars += 1;
+        name->position = curTable->numOfVars - 1;
+
+        pos = name->position;
+    }
+    else 
+        assert (0);
+
+    if (node->right)
+    {
+        parseExp (node->right, stk, asmFile);
+    }
+
+    fprintf (asmFile, "    POP [rax + %d]\n", pos);
+
+    fprintf (stderr, "end of PARSEVAR\n");
+}
+

@@ -10,7 +10,7 @@
 #include "functions.h"
 
 extern FILE* LOGFILEPTR;
-const char* ShortCMD       = "+-k*/^csln(){};";
+const char* ShortCMD       = "+-k*/^csln(){};=";
 const char   GraphFile[20] = "GraphFile.txt";
 
 size_t fileSize (FILE* file)
@@ -176,7 +176,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
                 break;
 
             case Num_t: 
-                dumpprint ("%lf }", node->left->numValue); 
+                dumpprint ("%lg }", node->left->numValue); 
                 break;
 
             case Var_t:
@@ -184,6 +184,14 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
                 break;
 
             case Unknown:
+                dumpprint ("%s}", node->left->Name);
+                break;
+
+            case Key_t:
+                dumpprint ("%s}", node->left->Name);
+                break;
+
+            case Func_t:
                 dumpprint ("%s}", node->left->Name);
                 break;
 
@@ -210,7 +218,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
                 break;
 
             case Num_t: 
-                dumpprint ("%lf }", node->right->numValue); 
+                dumpprint ("%lg }", node->right->numValue); 
                 break;
 
             case Var_t:
@@ -219,6 +227,14 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
 
             case Unknown:
                 dumpprint ("%s }", node->right->Name);
+                break;
+
+            case Key_t:
+                dumpprint ("%s}", node->right->Name);
+                break;
+
+            case Func_t:
+                dumpprint ("%s}", node->right->Name);
                 break;
 
             default:
@@ -260,7 +276,7 @@ void makeGraph (Node* node)
                 break;
 
             case Num_t: 
-                dumpprint ("%lf }", node->numValue); 
+                dumpprint ("%lg }", node->numValue); 
                 break;
             
             case Var_t:
@@ -268,6 +284,14 @@ void makeGraph (Node* node)
                 break;
 
             case Unknown:
+                dumpprint ("%s }", node->Name);
+                break;
+
+            case Key_t:
+                dumpprint ("%s }", node->Name);
+                break;
+
+            case Func_t:
                 dumpprint ("%s }", node->Name);
                 break;
 

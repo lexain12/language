@@ -4,6 +4,8 @@
 
 tm Tm = {};
 
+FILE* LOGFILEPTR = logOpen(LOGNAME);
+
 int logprint(char param)
 {
     fprintf(LOGFILEPTR, "%c", param);
@@ -45,4 +47,3 @@ FILE* logOpen(const char* logFileName)
 
     return filePtr;
 }
-
