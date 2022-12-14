@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include "../common.h"
 #include "analyzer.h"
+#include "../utils/include/ErrorHandlerLib.h"
 
 Node* getN (Utility* utils)
 {
@@ -21,7 +22,6 @@ Node* getN (Utility* utils)
     if ((**(utils->tokenArray)).type != Num_t)
     {
         if (isMinus) utils->tokenArray -= 1;
-        fprintf (stderr, "nullptr\n");
 
         return nullptr;
     }
@@ -267,19 +267,22 @@ Node* getFunction (Utility* utils)
 
                 Node* curNode = nullptr;
 
-                curNode = val->left;
-                
-                curNode->left = PARAM (getE (utils), nullptr);
-
-                curNode = curNode->left;
-
-                while ((**(utils->tokenArray)).opValue == OP_COM)
+                if ((**(utils->tokenArray)).opValue != OP_RBR)
                 {
-                    utils->tokenArray += 1;
+                    curNode = val->left;
+                    
+                    curNode->left = PARAM (getE (utils), nullptr);
 
-                    curNode->right = PARAM(getE (utils), nullptr);
+                    curNode = curNode->left;
 
-                    curNode = curNode->right;
+                    while ((**(utils->tokenArray)).opValue == OP_COM)
+                    {
+                        utils->tokenArray += 1;
+
+                        curNode->right = PARAM(getE (utils), nullptr);
+
+                        curNode = curNode->right;
+                    }
                 }
             }
             else 
@@ -312,7 +315,6 @@ Node* getStatement (Utility* utils)
 
         val = EQ(val, getE (utils));
 
-        fprintf (stderr, "POV %d %d\n", val->type, val->opValue);
 
         if ((**(utils->tokenArray)).opValue == OP_EQ)
             utils->tokenArray += 1;
@@ -387,6 +389,7 @@ Node* getStatement (Utility* utils)
                     assert (0);
             }
 
+            printError ("NO hp in the end of inititalization");
             assert (0);
         }
 
@@ -534,5 +537,106 @@ int power(int base, int n)
         p = p * base;
 
     return p;
+}
+
+void includeStdLib (Name* data, FILE* asmFile)
+{
+    if (data == nullptr)
+    {
+        printError ("function includeStdLib, data has nullptr");
+        assert (0);
+    }
+    if (asmFile ==  nullptr)
+    {
+        printError ("function includeStdLib, file has nullptr");
+        assert (0);
+    }
+
+    Name* curName = tableAdd ("in", data);
+
+    if (curName == nullptr)
+    {
+        printError ("Name \"in\" already in table");
+        assert (0);
+    }
+    curName->type = FUNC_TYPE;
+
+    printFuncIn (asmFile);
+
+    curName = tableAdd ("print", data);
+
+    if (curName == nullptr)
+    {
+        printError ("Name \"print\" already in table");
+        assert (0);
+    }
+
+    curName->type = FUNC_TYPE;
+
+    printFuncPrint (asmFile);
+
+    curName = tableAdd ("sqrt", data);
+
+    if (curName == nullptr)
+    {
+        printError ("Name \"sqrt\" already in table");
+        assert (0);
+    }
+
+    curName->type = FUNC_TYPE;
+
+    printFuncSqrt (asmFile);
+
+    curName = tableAdd ("abs", data);
+
+    if (curName == nullptr)
+    {
+        printError ("Name \"abs\" already in table");
+        assert (0);
+    }
+
+    curName->type = FUNC_TYPE;
+
+    printFuncAbs (asmFile);
+
+}
+
+void printFuncIn (FILE* asmFile)
+{
+    fprintf (asmFile, "in:\n");
+    fprintf (asmFile, "    IN\n");
+    fprintf (asmFile, "    RET\n");
+}
+
+void printFuncPrint (FILE* asmFile)
+{
+    fprintf (asmFile, "print:\n");
+    fprintf (asmFile, "    OUT\n");
+    fprintf (asmFile, "    RET\n");
+}
+void printFuncSqrt (FILE* asmFile)
+{
+    fprintf (asmFile, "sqrt:\n");
+    fprintf (asmFile, "    SQRT\n");
+    fprintf (asmFile, "    RET\n");
+}
+
+void printFuncAbs (FILE* asmFile)
+{
+    fprintf (asmFile, "abs:\n");
+    fprintf (asmFile, "ABS\n");
+    fprintf (asmFile, "RET\n");
+}
+
+void initAsmFile (FILE* asmFile)
+{
+    if (asmFile == nullptr)
+    {
+        printError ("asmFile has nullptr in function initAsmFile");
+        assert (0);
+    }
+
+    fprintf (asmFile, "CALL main:\n");
+    fprintf (asmFile, "HLT\n");
 }
 

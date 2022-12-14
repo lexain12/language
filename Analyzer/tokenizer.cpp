@@ -216,6 +216,11 @@ Node* keyWordCheck (char* data)
         val = WORD(data);
         val->type = Key_t;
     }
+    else if (strcmp ("Say", data) == 0)
+    {
+        val = WORD(data);
+        val->type = Key_t;
+    }
 
     else
         return WORD (data);

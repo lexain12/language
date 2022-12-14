@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <cassert>
 #include "common.h"
 #include "stack/config.h"
 #include "stack/stack.h"
@@ -13,6 +14,10 @@ int main()
 {
     InputFile inputFile = {"example.txt"}; 
     FILE* asmFile = fopen ("asmMainFile.txt", "w");
+    initAsmFile (asmFile);
+
+    FILE* langFile = fopen ("DBFile.txt", "w");
+    assert (langFile != nullptr);
     
     Utility utils = {}; 
     Stack_t stk   = {};
@@ -25,6 +30,7 @@ int main()
 
     utils.tokenArray = (Node**) calloc (fileSize(DBFileptr), sizeof(*(utils.tokenArray)));
     utils.nameTable.data  = (Name*) calloc (NUMOFNAMES, sizeof(*(utils.nameTable.data)));
+    includeStdLib (utils.nameTable.data, asmFile);
     getTokens (utils, inputFile.arrayOfLines[0].charArray);
 
     tree = getG (&utils);
@@ -32,6 +38,14 @@ int main()
 
     printf ("start parsing\n");
     parseSt (tree, &stk, 1, asmFile);
+    treePrint (tree, langFile);
+    fclose (langFile);
+
+    langFile = fopen ("DBFile.txt", "r");
+    NameTable tableForParse = {};  
+    tableForParse.data = (Name*) calloc (NUMOFNAMES, sizeof(*(tableForParse.data)));
+    tree = treeParse (tree, langFile, &tableForParse, Unknown);
+    treeDump (tree, "OH MY FUCKING GOD\n");
 
 //    for (int i = 0; utils.tokenArray[i]; i ++)
 //    {

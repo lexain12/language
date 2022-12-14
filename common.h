@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <stdio.h>
 const size_t MAXCMDSIZE    = 100;
 extern const size_t NUMOFNAMES;
 
@@ -23,6 +24,8 @@ enum OP
     OP_EQ     = 16,
     OP_COM    = 17,
 };
+
+extern const char* ShortOpArray;
 
 enum Type
 {
@@ -86,3 +89,8 @@ struct Utility
 //Table Of Names
 Name* tableAdd (char* name, Name* table);
 Name* findInTable (char* name, Name* table);
+void includeStdLib (Name* data, FILE* asmFile);
+void initAsmFile (FILE* asmFile);
+
+void treePrint (const Node* node, FILE* DBFileptr);
+Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type);

@@ -4,10 +4,9 @@ extern const size_t MAXDATASIZE;
 //tokenizer
 void getBOpToken (Node*** tokenArray, char** string);
 void skipSpaces (char** string);
+void skipFileSpace (FILE* file);
 void getOpOrWordToken (Node*** tokenArray, char** string, Utility utils);
 void getTokens (Utility utils, char* string);
-Name* findInTable (char* name, Name* table);
-Name* tableAdd (char* name, Name* table);
 Node* keyWordCheck (char* data);
 
 //common
@@ -29,8 +28,6 @@ Node* getUnOP (Node*** tokenArray);
 Node* getVar (Utility* utils);
 
 //Table Of Names
-Name* tableAdd (char* name, Name* table);
-Name* findInTable (char* name, Name* table);
 
 #define createNum(NUM) createNode(Num_t, UnknownOp, NUM, nullptr, nullptr, nullptr, nullptr)
 #define SUB(left, right) createNode(OP_t, OP_SUB, 0, nullptr, nullptr, left, right)
@@ -55,3 +52,7 @@ Name* findInTable (char* name, Name* table);
 #define ST(left, right) createNode(Key_t, UnknownOp, 0, nullptr, "ST", left, right)
 #define PARAM(left, right) createNode(Key_t, UnknownOp, 0, nullptr, "PARAM", left, right)
 
+void printFuncPrint (FILE* asmFile);
+void printFuncIn (FILE* asmFile);
+void printFuncSqrt (FILE* asmFile);
+void printFuncAbs (FILE* asmFile);
