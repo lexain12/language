@@ -5,7 +5,9 @@
 #include "analyzer.h"
 #include "../utils/include/ErrorHandlerLib.h"
 
-const char* ShortOpArray = "n+-*/^csll(){};=,";
+const char* ShortOpArray = "n+-n*/^csll(){};=,<>";
+const char* FullOpArray[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "IS_BT", "IS_GT"};
+const size_t NUMOFNAMES = 100;
 
 void treePrint (const Node* node, FILE* DBFileptr)
 {
@@ -20,7 +22,7 @@ void treePrint (const Node* node, FILE* DBFileptr)
         return;
     }
 
-    fprintf (DBFileptr, "{");
+    fprintf (DBFileptr, " { ");
 
     switch (node->type)
     {
@@ -29,7 +31,7 @@ void treePrint (const Node* node, FILE* DBFileptr)
             break;
 
         case OP_t:
-            fprintf (DBFileptr, " %c ", ShortOpArray[node->opValue]);
+            fprintf (DBFileptr, " %s ", FullOpArray[node->opValue]);
             break;
 
         case Var_t:
@@ -53,24 +55,29 @@ void treePrint (const Node* node, FILE* DBFileptr)
             assert (0);
     }
 
+    if ((node->left == nullptr) && (node->right == nullptr))
+    {
+        fprintf (DBFileptr, " } ");
+        return;
+    }
+
     if (node->left)  
         treePrint (node->left, DBFileptr);
     else
-        fprintf (DBFileptr, "{ NIL }");
+        fprintf (DBFileptr, " { NIL } ");
             
     if (node->right) 
         treePrint (node->right, DBFileptr);
     else
-        fprintf (DBFileptr, "{ NIL }");
+        fprintf (DBFileptr, " { NIL } ");
 
-    fprintf (DBFileptr, "}");
+    fprintf (DBFileptr, " } ");
 
     return;
 }
 
 Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
 {
-    assert (node != nullptr);
     assert (DBFileptr != nullptr);
     assert (nameTable != nullptr);
     char* data = (char*) calloc (MAXDATASIZE, sizeof(*data));
@@ -79,7 +86,9 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
     Type leftType          = Unknown;
     Type rightType         = Unknown;
 
+    skipFileSpace (DBFileptr);
     bracket = (char) fgetc (DBFileptr);
+    printf ("%c\n", bracket);
 
     Node* curNode = nullptr; 
 
@@ -115,7 +124,8 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
                     else if (strcmp (data, "VAR") == 0)
                     {
                         leftType = Var_t;
-                        curNode = VAR();
+                        curNode = WORD("VAR");
+                        curNode->type = Key_t;
                         curNode->var.varName = data;
                     }
                     else if (strcmp (data, "ADD") == 0)
@@ -130,11 +140,19 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
                     else if (strcmp (data, "DIV") == 0)
                         curNode = DIV(nullptr, nullptr);
 
+                    else if (strcmp (data, "EQ") == 0)
+                        curNode = EQ(nullptr, nullptr);
+
+                    else if (strcmp (data, "IS_GT") == 0)
+                        curNode = ABV(nullptr, nullptr);
+
+                    else if (strcmp (data, "IS_BT") == 0)
+                        curNode = BLW(nullptr, nullptr);
+
                     else if (strcmp (data, "PARAM") == 0)
                     {
                         curNode = WORD("PARAM");
                         curNode->type = Key_t;
-                        leftType = Var_t;
                     }
 
                     else if (strcmp (data, "RET") == 0)
@@ -149,9 +167,21 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
                         curNode->Name = "CALL";
                         leftType = Func_t;
                     }
+
                     else if (strcmp (data, "NIL") == 0)
                     {
                         curNode = nullptr;
+                    }
+
+                    else if (strcmp (data, "IF") == 0)
+                    {
+                        curNode = WORD("IF");
+                        curNode->type = Key_t;
+                    }
+                    else if (strcmp (data, "ELSE") == 0)
+                    {
+                        curNode = WORD("ELSE");
+                        curNode->type = Key_t;
                     }
 
                     else
@@ -167,8 +197,8 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
                     if (strcmp (data, "VAR") == 0)
                     {
                         leftType = Var_t;
-                        curNode = VAR();
-                        curNode->var.varName = data;
+                        curNode = WORD("VAR");
+                        curNode->type = Key_t;
                     }
                     else 
                     {
@@ -246,6 +276,8 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
         return curNode;
     }
 
+
+    printError ("problem place near %d\n", ftell (DBFileptr));
     assert (0);
     return curNode;
 }
@@ -264,4 +296,19 @@ void skipFileSpace (FILE* file)
     }
 
     ungetc (curChar, file);
+}
+
+Node* getTreeFromStandart (const char* FileName)
+{
+    printf ("Getting tree from standart\n");
+    FILE* langFile = fopen (FileName, "r");
+    if (langFile == nullptr)
+    {
+        printError ("Can't open file %s", FileName);
+        assert (0);
+    }
+
+    NameTable tableForParse = {};  
+    tableForParse.data = (Name*) calloc (NUMOFNAMES, sizeof(*(tableForParse.data)));
+    return treeParse (nullptr, langFile, &tableForParse, Unknown);
 }

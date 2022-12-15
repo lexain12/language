@@ -54,6 +54,14 @@ void getBOpToken (Node*** tokenArray, char** string)
         case ',':
             **tokenArray = COM ();
             break;
+        
+        case '<':
+            **tokenArray = BLW (nullptr, nullptr);
+            break;
+
+        case '>':
+            **tokenArray = ABV (nullptr, nullptr);
+            break;
 
         default:
             assert (0);
@@ -78,7 +86,7 @@ void getTokens (Utility utils, char* string)
         if (isspace (*string))
             skipSpaces (&string);
 
-        else if (strchr ("+-*/^(){};,", *string))
+        else if (strchr ("+-*/^(){};,<>", *string))
         {
             getBOpToken (&(utils.tokenArray), &string);
         }
@@ -188,6 +196,11 @@ Node* keyWordCheck (char* data)
     }
 
     else if (strcmp ("right", data) == 0)
+    {
+        val = WORD(data);
+        val->type = Key_t;
+    }
+    else if (strcmp ("left", data) == 0)
     {
         val = WORD(data);
         val->type = Key_t;

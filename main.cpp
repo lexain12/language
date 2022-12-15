@@ -8,7 +8,7 @@
 #include "readerLib/functions.h"
 #include "midleend/Writer.h"
 
-const size_t NUMOFNAMES = 100;
+const char* standartFileName = "DBFile.txt";
 
 int main()
 {
@@ -35,17 +35,16 @@ int main()
 
     tree = getG (&utils);
     treeDump (tree, "LOOK\n");
-
-    printf ("start parsing\n");
-    parseSt (tree, &stk, 1, asmFile);
     treePrint (tree, langFile);
     fclose (langFile);
 
-    langFile = fopen ("DBFile.txt", "r");
-    NameTable tableForParse = {};  
-    tableForParse.data = (Name*) calloc (NUMOFNAMES, sizeof(*(tableForParse.data)));
-    tree = treeParse (tree, langFile, &tableForParse, Unknown);
-    treeDump (tree, "OH MY FUCKING GOD\n");
+    tree = getTreeFromStandart (standartFileName);
+    treeDump (tree, "OH my fuckiing gooooood\n");
+
+    printf ("start parsing\n");
+    parseSt (tree, &stk, 1, asmFile);
+
+
 
 //    for (int i = 0; utils.tokenArray[i]; i ++)
 //    {

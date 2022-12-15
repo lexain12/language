@@ -23,6 +23,8 @@ enum OP
     OP_TER    = 15,
     OP_EQ     = 16,
     OP_COM    = 17,
+    OP_BLW    = 18,
+    OP_ABV    = 19,
 };
 
 extern const char* ShortOpArray;
@@ -92,5 +94,8 @@ Name* findInTable (char* name, Name* table);
 void includeStdLib (Name* data, FILE* asmFile);
 void initAsmFile (FILE* asmFile);
 
+//Working with standart
 void treePrint (const Node* node, FILE* DBFileptr);
 Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type);
+Node* getTreeFromStandart (const char* FileName);
+

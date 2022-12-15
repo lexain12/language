@@ -21,11 +21,7 @@ void print(double param);
 
 // const Elem_t POISON = (char *) (0x1000 - 0x7);
 
-int getPoison(int elem);
-float getPoison(float elem);
-double getPoison(double elem);
-char getPoison(char elem);
-char* getPoison(char* elem);
+Elem_t getPoison(Elem_t elem);
 
 const size_t DefaultCapacity    = 10;
 

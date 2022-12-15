@@ -10,7 +10,7 @@
 #include "functions.h"
 
 extern FILE* LOGFILEPTR;
-const char* ShortCMD       = "+-k*/^csln(){};=";
+const char* ShortCMD       = "+-k*/^csln(){};=,<>";
 const char   GraphFile[20] = "GraphFile.txt";
 
 size_t fileSize (FILE* file)
@@ -131,7 +131,6 @@ int readFileToLinesStruct(FILE* openedFile, InputFile* inputFile)
     ASSERT(openedFile != nullptr);
     
     readFile(openedFile, &(inputFile->text));
-    char* text = inputFile->text;
     textToStr(inputFile->text, &(inputFile->numberOfLines));
     splitIntoLines(inputFile);
     strToText (inputFile->text, &(inputFile->numberOfLines));

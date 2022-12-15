@@ -6,7 +6,8 @@ FILE* DBGFILEPTR = dbgOpen(DBGFILENAME);
 
 void print (FILE* file, Elem_t element)  //change that
 {
-    fprintf (file, "%lg", element);
+    element += 1;
+    fprintf (file, "Cant provide inf\n");
 }
 
 FILE* dbgOpen(const char* dbgFileName)

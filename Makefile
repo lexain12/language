@@ -9,8 +9,14 @@ all: main
 main: dir main.o loglib.o reader.o tokenizer.o utils.o lexer.o stack.o middleend.o ErrorHandler consoleColor writing.o
 	$(CXX) bin/main.o bin/Loglib.o bin/reader.o bin/tokenizer.o bin/utils.o bin/lexer.o bin/stack.o bin/middleEnd.o bin/ErrorHandler.o bin/consoleColor.o bin/writing.o -o language.out
 
+reverse: dir reverseFrontEnd.o ErrorHandler consoleColor writing.o lexer.o tokenizer.o utils.o
+	$(CXX) bin/reverseFrontEnd.o bin/ErrorHandler.o bin/consoleColor.o bin/writing.o bin/tokenizer.o bin/lexer.o bin/utils.o -o reverseTranslate.out
+
 dir:
 	mkdir -p bin
+
+reverseFrontEnd.o: Analyzer/reverseFrontEnd.cpp
+	$(CXX) $(CXXFLAGS) Analyzer/reverseFrontEnd.cpp -c -o bin/reverseFrontEnd.o
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) main.cpp -c -o bin/main.o 
@@ -43,7 +49,7 @@ middleend.o: midleend/Writer.cpp
 	$(CXX) $(CXXFLAGS) midleend/Writer.cpp -c -o bin/middleEnd.o
 
 sanitize: 
-	$(CLANGSTZ) readerLib/functions.cpp Analyzer/utils.cpp Analyzer/lexer.cpp Analyzer/tokenizer.cpp stack/stack.cpp main.cpp logs/Loglib.cpp midleend/Writer.cpp utils/src/ErrorHandlerLib.cpp utils/src/consoleColorLib.cpp -o language.out 
+	$(CLANGSTZ) readerLib/functions.cpp Analyzer/utils.cpp Analyzer/lexer.cpp Analyzer/tokenizer.cpp stack/stack.cpp main.cpp logs/Loglib.cpp midleend/Writer.cpp utils/src/ErrorHandlerLib.cpp utils/src/consoleColorLib.cpp Analyzer/WriteIntoDb.cpp -o language.out 
 
 writing.o:
 	$(CXX) $(CXXFLAGS) Analyzer/WriteIntoDb.cpp -c -o bin/writing.o

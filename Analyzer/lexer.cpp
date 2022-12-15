@@ -131,6 +131,29 @@ Node* getVar (Utility* utils)
     return val;
 }
 
+Node* getCondition (Utility* utils)
+{
+    assert (utils->tokenArray != nullptr);
+
+    Node* val = getE (utils);
+
+    if ((**(utils->tokenArray)).opValue == OP_ABV ||
+        (**(utils->tokenArray)).opValue == OP_BLW)
+    {
+        int op = (**(utils->tokenArray)).opValue; 
+
+        utils->tokenArray += 1;
+
+        Node* val2 = getE (utils);
+
+        if (op == OP_ABV)
+            return ABV(val, val2);
+        else 
+            return BLW(val, val2);
+    }
+    return val;
+}
+
 Node* getFunction (Utility* utils)
 {
     
@@ -256,6 +279,7 @@ Node* getFunction (Utility* utils)
                 val->type = Func_t;
 
                 val = FUNC(val, nullptr);
+                fprintf (stderr, "NAME %s\n", val->left->Name);
 
                 val->Name = "CALL";
 
@@ -286,7 +310,10 @@ Node* getFunction (Utility* utils)
                 }
             }
             else 
+            {
+                printError ("No left bracket while calling function %s", val->left->Name);
                 assert (0);
+            }
 
             if ((**(utils->tokenArray)).opValue == OP_RBR)
                 utils->tokenArray += 1;
@@ -401,7 +428,7 @@ Node* getStatement (Utility* utils)
                 utils->tokenArray += 1;
                 val = WORD("WHILE");
                 val->type = Key_t;
-                val->left = getE (utils);
+                val->left = getCondition (utils);
             }
             else assert (0);
 
@@ -447,7 +474,7 @@ Node* getStatement (Utility* utils)
                 utils->tokenArray += 1;
                 val = WORD("IF");
                 val->type = Key_t;
-                val->left = getE (utils);
+                val->left = getCondition (utils);
             }
             else assert (0);
 
@@ -479,10 +506,54 @@ Node* getStatement (Utility* utils)
             if ((**(utils->tokenArray)).opValue == OP_FRB)
             {
                 utils->tokenArray += 1;
-
-                return val;
             }
             else assert (0);
+
+            if ((**(utils->tokenArray)).type == Key_t)
+            {
+                Node* elseNode = nullptr;
+
+                if (strcmp((**utils->tokenArray).Name, "left") == 0)
+                {
+                    utils->tokenArray += 1;
+                    elseNode = ELSE(val->right, nullptr);
+
+                    if ((**(utils->tokenArray)).opValue == OP_FLB)
+                    {
+                        utils->tokenArray += 1;
+
+                        elseNode->right = ST(getStatement (utils), nullptr);
+                        elseNode->right->type = Key_t;
+
+
+                        Node* curNode = elseNode->right;
+                        Node* newNode = nullptr;
+
+                        while (newNode = getStatement (utils))
+                        {
+                            curNode->right = ST(newNode, nullptr);
+                            curNode = curNode->right;
+                        }
+                        val->right = elseNode;
+                    }
+                    else 
+                    {
+                        printError ("No { in else statement");
+                        assert (0);
+                    }
+                    if ((**(utils->tokenArray)).opValue == OP_FRB)
+                    {
+                        utils->tokenArray += 1;
+                    }
+                    else 
+                    {
+                        printError ("No } in else statement");
+                        assert (0);
+                    }
+                }
+
+            }
+            return val;
         }
 
         else if (strcmp ((**(utils->tokenArray)).Name, "K.O.") == 0)
@@ -527,16 +598,6 @@ Node* getG (Utility* utils)
 
     return mainNode;
 
-}
-
-int power(int base, int n)
-{
-    int p = 1;
-
-    for (int i = 1; i <= n; ++i)
-        p = p * base;
-
-    return p;
 }
 
 void includeStdLib (Name* data, FILE* asmFile)

@@ -1,4 +1,7 @@
 #pragma once
+
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 extern const size_t MAXDATASIZE;
 
 //tokenizer
@@ -26,6 +29,7 @@ Node* getT (Utility* utils);
 Node* getPW (Node*** tokenArray);
 Node* getUnOP (Node*** tokenArray);
 Node* getVar (Utility* utils);
+Node* getCondition (Utility* utils);
 
 //Table Of Names
 
@@ -35,6 +39,8 @@ Node* getVar (Utility* utils);
 #define MUL(left, right) createNode(OP_t, OP_MUL, 0, nullptr, nullptr, left, right)
 #define DIV(left, right) createNode(OP_t, OP_DIV, 0, nullptr, nullptr, left, right)
 #define POW(left, right) createNode(OP_t, OP_POW, 0, nullptr, nullptr, left, right)
+#define ABV(left, right) createNode(OP_t, OP_ABV, 0, nullptr, nullptr, left, right)
+#define BLW(left, right) createNode(OP_t, OP_BLW, 0, nullptr, nullptr, left, right)
 #define COS(right) createNode(      OP_t, OP_COS, 0, nullptr, nullptr, nullptr, right)
 #define SIN(right) createNode(      OP_t, OP_SIN, 0, nullptr, nullptr, nullptr, right)
 #define LOG(left, right) createNode(OP_t, OP_LOG, 0, nullptr, nullptr, left, right)
@@ -43,6 +49,7 @@ Node* getVar (Utility* utils);
 #define RBR()     createNode(       OP_t, OP_RBR, 0, nullptr, nullptr, nullptr, nullptr)
 #define FLB()     createNode(       OP_t, OP_FLB, 0, nullptr, nullptr, nullptr, nullptr)
 #define FRB()     createNode(       OP_t, OP_FRB, 0, nullptr, nullptr, nullptr, nullptr)
+#define ELSE(left, right) createNode(Key_t, UnknownOp, 0, nullptr, "ELSE", left, right)
 #define WORD(name) createNode(Unknown, UnknownOp, 0, nullptr, name, nullptr, nullptr)
 #define TER()     createNode(       OP_t, OP_TER, 0, nullptr, nullptr, nullptr, nullptr)
 #define COM()     createNode(       OP_t, OP_COM, 0, nullptr, nullptr, nullptr, nullptr)
