@@ -10,7 +10,7 @@
 #include "functions.h"
 
 extern FILE* LOGFILEPTR;
-const char* ShortCMD       = "+-k*/^csln(){};=,<>";
+const char* FullOpArray1[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "&lt;", "&gt;", "IN", "OUT"};
 const char   GraphFile[20] = "GraphFile.txt";
 
 size_t fileSize (FILE* file)
@@ -131,6 +131,7 @@ int readFileToLinesStruct(FILE* openedFile, InputFile* inputFile)
     ASSERT(openedFile != nullptr);
     
     readFile(openedFile, &(inputFile->text));
+    char* text = inputFile->text;
     textToStr(inputFile->text, &(inputFile->numberOfLines));
     splitIntoLines(inputFile);
     strToText (inputFile->text, &(inputFile->numberOfLines));
@@ -165,40 +166,45 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
 
     if (node->left)
     {
-        dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"{ %d | ",
+        //dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"{ %d | ",
+        dumpprint ("    nd%p [label=\"{ %d | ",
                     node->left, node->left->type);
 
         switch (node->left->type)
         {
             case OP_t: 
-                dumpprint ("\'%c\' }", ShortCMD[node->left->opValue - 1]);
+                dumpprint ("%s }\", fillcolor=\"#ffc0c0\" ", FullOpArray1[node->left->opValue - 1]);
                 break;
 
             case Num_t: 
-                dumpprint ("%lg }", node->left->numValue); 
+                dumpprint ("%lg}\", fillcolor=\"#c0ffc0\" ", node->left->numValue); 
                 break;
 
             case Var_t:
-                dumpprint ("%s }", node->left->var.varName);
+                dumpprint ("%s}\", fillcolor=\"#c0c0ff\" ", node->left->var.varName);
                 break;
 
             case Unknown:
-                dumpprint ("%s}", node->left->Name);
+                dumpprint ("%s}\", fillcolor=\"#ffffc0\"", node->left->Name);
                 break;
 
             case Key_t:
-                dumpprint ("%s}", node->left->Name);
+                dumpprint ("%s}\", fillcolor=\"#ffc0ff\"", node->left->Name);
                 break;
 
             case Func_t:
-                dumpprint ("%s}", node->left->Name);
+                dumpprint ("%s}\", fillcolor=\"#c0ffff\"", node->left->Name);
+                break;
+
+            case BuiltIn_t:
+                dumpprint ("%s}\", fillcolor=\"#c0c0c0c\"", FullOpArray1[node->left->opValue - 1]);
                 break;
 
             default:
                 fprintf (stderr, "%d\n", node->left->type);
                 assert (0);
         }
-        dumpprint (" \"];\n");
+        dumpprint (" ];\n");
 
         dumpprint ("    nd%p -> nd%p;\n", node, node->left);
 
@@ -213,7 +219,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
         switch (node->right->type)
         {
             case OP_t: 
-                dumpprint ("\'%c\' }", ShortCMD[node->right->opValue - 1]);
+                dumpprint ("\'%c\' }", FullOpArray1[node->right->opValue - 1]);
                 break;
 
             case Num_t: 
@@ -234,6 +240,10 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
 
             case Func_t:
                 dumpprint ("%s}", node->right->Name);
+                break;
+
+            case BuiltIn_t:
+                dumpprint ("%s }", FullOpArray1[node->left->opValue - 1]);
                 break;
 
             default:
@@ -271,7 +281,7 @@ void makeGraph (Node* node)
         switch (node->type)
         {
             case OP_t: 
-                dumpprint ("\'%c\' }", ShortCMD[node->opValue - 1]);
+                dumpprint ("%s}", FullOpArray1[node->opValue - 1]);
                 break;
 
             case Num_t: 
@@ -292,6 +302,10 @@ void makeGraph (Node* node)
 
             case Func_t:
                 dumpprint ("%s }", node->Name);
+                break;
+
+            case BuiltIn_t:
+                dumpprint ("%s}", FullOpArray1[node->left->opValue - 1]);
                 break;
 
             default:

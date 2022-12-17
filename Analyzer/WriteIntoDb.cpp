@@ -5,8 +5,8 @@
 #include "analyzer.h"
 #include "../utils/include/ErrorHandlerLib.h"
 
+const char* FullOpArray[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "IS_BT", "IS_GT", "IN", "OUT"};
 const char* ShortOpArray = "n+-n*/^csll(){};=,<>";
-const char* FullOpArray[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "IS_BT", "IS_GT"};
 const size_t NUMOFNAMES = 100;
 
 void treePrint (const Node* node, FILE* DBFileptr)
@@ -48,6 +48,10 @@ void treePrint (const Node* node, FILE* DBFileptr)
 
         case Func_t:
             fprintf (DBFileptr, " %s ", node->Name);
+            break;
+
+        case BuiltIn_t:
+            fprintf (DBFileptr, " %s ", FullOpArray[node->opValue]);
             break;
 
         default:
@@ -178,10 +182,31 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
                         curNode = WORD("IF");
                         curNode->type = Key_t;
                     }
+                    else if (strcmp (data, "WHILE") == 0)
+                    {
+                        curNode = WORD("WHILE");
+                        curNode->type = Key_t;
+                    }
+
                     else if (strcmp (data, "ELSE") == 0)
                     {
                         curNode = WORD("ELSE");
                         curNode->type = Key_t;
+                    }
+                    else if (strcmp (data, "OUT") == 0)
+                    {
+                        curNode = BUILTIN (OP_OUT);
+                    }
+
+                    else if (strcmp (data, "IN") == 0)
+                    {
+                        curNode = BUILTIN (OP_IN);
+                    }
+
+                    else if (strcmp (data, "SQRT") == 0)
+                    {
+                        curNode = WORD("sqrt");
+                        curNode->type = Func_t;
                     }
 
                     else
@@ -298,6 +323,68 @@ void skipFileSpace (FILE* file)
     ungetc (curChar, file);
 }
 
+Node* makeTreeStandartIn (Node* node)
+{
+    if (node->left)
+    {
+        if (node->left->right)
+        {
+            if (node->left->right->type == Func_t)
+            {
+                fprintf (stderr, "Was here1\n");
+                if (strcmp (node->left->right->Name, "CALL") == 0)
+                {
+                    fprintf (stderr, "Was here2\n");
+                    if (strcmp (node->left->right->left->Name, "in") == 0)
+                    {
+                        node->left = IN(node->left->left);
+                    }
+                }
+            }
+        }
+        if (node->left->left)
+        {
+            if (node->left->left->type == Func_t)
+            {
+                if (strcmp (node->left->left->Name, "print") == 0)
+                {
+                    fprintf (stderr, "Was here\n");
+                    node->left = node->left->left;
+                    node->left->Name = "OUT";
+                }
+            }
+        }
+    }
+    if (node->left)
+        node->left = makeTreeStandartIn (node->left);
+
+    if (node->right)
+        node->right = makeTreeStandartIn (node->right);
+
+    return node;
+}
+
+Node* makeTreeStandartOut (Node* node)
+{
+    if (node->left)
+        node->left = makeTreeStandartOut (node->left);
+
+    if (node->right)
+        node->right = makeTreeStandartOut (node->right);
+
+    if (node->left)
+        if (node->left->type == Func_t)
+        {
+            if (strcmp (node->left->Name, "print") == 0 || strcmp (node->left->Name, "sqrt") == 0)
+            {
+                node->left = FUNC (node->left, nullptr);
+                node->left->Name = "CALL";
+            }
+        }
+
+    return node;
+}
+
 Node* getTreeFromStandart (const char* FileName)
 {
     printf ("Getting tree from standart\n");
@@ -310,5 +397,6 @@ Node* getTreeFromStandart (const char* FileName)
 
     NameTable tableForParse = {};  
     tableForParse.data = (Name*) calloc (NUMOFNAMES, sizeof(*(tableForParse.data)));
-    return treeParse (nullptr, langFile, &tableForParse, Unknown);
+    Node* tree = treeParse (nullptr, langFile, &tableForParse, Unknown);
+    return tree;
 }

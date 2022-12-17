@@ -35,6 +35,7 @@ int main()
 
     tree = getG (&utils);
     treeDump (tree, "LOOK\n");
+    treeDump (tree, "LOOK\n");
     treePrint (tree, langFile);
     fclose (langFile);
 

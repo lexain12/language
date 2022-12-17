@@ -58,6 +58,8 @@ Node* getCondition (Utility* utils);
 #define FUNC(left, right) createNode(Func_t, UnknownOp, 0, nullptr, "FUNC", left, right)
 #define ST(left, right) createNode(Key_t, UnknownOp, 0, nullptr, "ST", left, right)
 #define PARAM(left, right) createNode(Key_t, UnknownOp, 0, nullptr, "PARAM", left, right)
+#define IN(param) createNode(Key_t, UnknownOp, 0, nullptr, "IN", PARAM(param, nullptr), nullptr)
+#define BUILTIN(op) createNode(BuiltIn_t, op, 0, nullptr, nullptr, nullptr, nullptr)
 
 void printFuncPrint (FILE* asmFile);
 void printFuncIn (FILE* asmFile);

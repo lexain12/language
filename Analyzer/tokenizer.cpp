@@ -27,25 +27,17 @@ void getBOpToken (Node*** tokenArray, char** string)
         case '/':
             **tokenArray = DIV (nullptr, nullptr);
             break;
+
+        case '(':
+            **tokenArray = LBR();
+            break;
+
+        case ')':
+            **tokenArray = RBR();
+            break;
         
         case '^':
             **tokenArray = POW (nullptr, nullptr);
-            break;
-        
-        case '(':
-            **tokenArray = LBR ();
-            break;
-        
-        case ')':
-            **tokenArray = RBR ();
-            break;
-
-        case '}':
-            **tokenArray = FRB ();
-            break;
-
-        case '{':
-            **tokenArray = FLB ();
             break;
         case ';':
             **tokenArray = TER ();
@@ -64,6 +56,7 @@ void getBOpToken (Node*** tokenArray, char** string)
             break;
 
         default:
+            fprintf (stderr, "%c\n", **string);
             assert (0);
     }
 
@@ -86,7 +79,7 @@ void getTokens (Utility utils, char* string)
         if (isspace (*string))
             skipSpaces (&string);
 
-        else if (strchr ("+-*/^(){};,<>", *string))
+        else if (strchr ("+-*/^();,<>", *string))
         {
             getBOpToken (&(utils.tokenArray), &string);
         }
@@ -119,25 +112,49 @@ void getOpOrWordToken (Node*** tokenArray, char** string, Utility utils)
     if (strEqual (ptr, "sin"))
     {
         *string += 3;
-        **tokenArray = SIN (nullptr);
+        **tokenArray = BUILTIN(OP_SIN);
         *tokenArray += 1;
     }
     else if (strEqual (ptr, "cos"))
     {
         *string += 3;
-        **tokenArray = COS (nullptr);
+        **tokenArray = BUILTIN(OP_COS);
         *tokenArray += 1;
     }
     else if (strEqual (ptr, "ln"))
     {
         *string += 2;
-        **tokenArray = LN (nullptr);
+        **tokenArray = BUILTIN(OP_LN);
         *tokenArray += 1;
     }
     else if (strEqual (ptr, "log"))
     {
         *string += 3;
-        **tokenArray = LOG (nullptr, nullptr);
+        **tokenArray = BUILTIN (OP_LOG);
+        *tokenArray += 1;
+    }
+    else if (strEqual (ptr, "OUT"))
+    {
+        *string += 3;
+        **tokenArray = BUILTIN (OP_OUT);
+        *tokenArray += 1;
+    }
+    else if (strEqual (ptr, "IN"))
+    {
+        *string += 2;
+        **tokenArray = BUILTIN (OP_IN);
+        *tokenArray  += 1;
+    }
+    else if (strEqual (ptr, "box"))
+    {
+        *string += 3;
+        **tokenArray = FLB();
+        *tokenArray += 1;
+    }
+    else if (strEqual (ptr, "round"))
+    {
+        *string += 5;
+        **tokenArray = FRB();
         *tokenArray += 1;
     }
     else 

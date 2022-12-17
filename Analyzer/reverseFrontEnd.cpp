@@ -6,7 +6,7 @@
 
 const char StandartFileName[] = "DBFile.txt";
 const char OutFileName[]      = "translated.txt";
-const char* WordForOP[]       = {"None", "tape", "jab", "None", "drug", "uppercut", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "<", ">"};
+const char* WordForOP[]       = {"None", "tape", "jab", "None", "drug", "uppercut", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "<", ">", "IN", "OUT"};
 
 void translate (Node* tree, const char* outFileName);
 void printTreeInLang (Node* node, FILE* fileptr);
@@ -82,7 +82,7 @@ void printTreeInLang (Node* node, FILE* fileptr)
                 if (node->right)
                     printTreeInLang (node->right, fileptr);
 
-                fprintf (fileptr, "}\n");
+                fprintf (fileptr, "};\n");
             }
             break;
 
@@ -171,6 +171,18 @@ void printTreeInLang (Node* node, FILE* fileptr)
             printExpInLang (node, fileptr);
             fprintf (fileptr, ";\n");
             break;
+
+        case BuiltIn_t:
+            if (node->left)
+            {
+                if (node->left->left)
+                {
+                    fprintf (fileptr, "%s (", WordForOP [node->opValue]);
+                    fprintf (fileptr, "%s)", node->left->left->var.varName);
+                }
+            }
+            fprintf (fileptr, ";\n");
+            break;
     }
 }
 
@@ -212,6 +224,17 @@ void printExpInLang (Node* node, FILE* fileptr)
             if (node->right)
                 printExpInLang (node->right, fileptr);
 
+            break;
+
+        case BuiltIn_t:
+            if (node->left)
+            {
+                if (node->left->left)
+                {
+                    fprintf (fileptr, "%s (", WordForOP [node->opValue]);
+                    fprintf (fileptr, "%s)", node->left->left->var.varName);
+                }
+            }
             break;
 
         case Func_t:

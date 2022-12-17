@@ -321,6 +321,44 @@ Node* getFunction (Utility* utils)
                 assert (0);
             
         }
+    }
+
+    else if ((**(utils->tokenArray)).type == BuiltIn_t)
+    {
+        fprintf (stderr, "Was here\n");
+        Name* curName = nullptr;
+        Node* curNode = nullptr;
+        val = *(utils->tokenArray);
+
+        utils->tokenArray += 1;
+
+        if ((**(utils->tokenArray)).opValue == OP_LBR)
+        {
+            utils->tokenArray += 1;
+
+            if ((**(utils->tokenArray)).opValue != OP_RBR)
+            {
+                curNode = val;
+                
+                curNode->left = PARAM (getE (utils), nullptr);
+
+                curNode = curNode->left;
+
+                while ((**(utils->tokenArray)).opValue == OP_COM)
+                {
+                    utils->tokenArray += 1;
+
+                    curNode->right = PARAM(getE (utils), nullptr);
+
+                    curNode = curNode->right;
+                }
+            }
+        }
+
+        if ((**(utils->tokenArray)).opValue == OP_RBR)
+            utils->tokenArray += 1;
+        else 
+            assert (0);
 
     }
 
@@ -371,7 +409,10 @@ Node* getStatement (Utility* utils)
                 assert (0);
         }
         else 
+        {
+            printError ("No ; in the end of statement");
             assert (0);
+        }
     }
 
     else if ((**(utils->tokenArray)).type == Key_t)
@@ -413,7 +454,10 @@ Node* getStatement (Utility* utils)
                     return val;
                 }
                 else 
+                {
+                    printError ("No ; in the end of statement");
                     assert (0);
+                }
             }
 
             printError ("NO hp in the end of inititalization");
@@ -664,27 +708,27 @@ void includeStdLib (Name* data, FILE* asmFile)
 
 void printFuncIn (FILE* asmFile)
 {
-    fprintf (asmFile, "in:\n");
+    fprintf (asmFile, "IN:\n");
     fprintf (asmFile, "    IN\n");
     fprintf (asmFile, "    RET\n");
 }
 
 void printFuncPrint (FILE* asmFile)
 {
-    fprintf (asmFile, "print:\n");
+    fprintf (asmFile, "OUT:\n");
     fprintf (asmFile, "    OUT\n");
     fprintf (asmFile, "    RET\n");
 }
 void printFuncSqrt (FILE* asmFile)
 {
-    fprintf (asmFile, "sqrt:\n");
+    fprintf (asmFile, "SQRT:\n");
     fprintf (asmFile, "    SQRT\n");
     fprintf (asmFile, "    RET\n");
 }
 
 void printFuncAbs (FILE* asmFile)
 {
-    fprintf (asmFile, "abs:\n");
+    fprintf (asmFile, "ABS:\n");
     fprintf (asmFile, "ABS\n");
     fprintf (asmFile, "RET\n");
 }

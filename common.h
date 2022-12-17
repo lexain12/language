@@ -25,9 +25,12 @@ enum OP
     OP_COM    = 17,
     OP_BLW    = 18,
     OP_ABV    = 19,
+    OP_IN     = 20,
+    OP_OUT    = 21,
 };
 
 extern const char* ShortOpArray;
+extern const char* FullOpArray[];
 
 enum Type
 {
@@ -37,6 +40,7 @@ enum Type
     Num_t   = 3,
     Key_t   = 4,
     Func_t  = 5,
+    BuiltIn_t = 6,
 };
 
 enum VarType 
@@ -98,4 +102,6 @@ void initAsmFile (FILE* asmFile);
 void treePrint (const Node* node, FILE* DBFileptr);
 Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type);
 Node* getTreeFromStandart (const char* FileName);
+Node* makeTreeStandartIn (Node* node);
+Node* makeTreeStandartOut (Node* node);
 
