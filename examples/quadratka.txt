@@ -1,0 +1,31 @@
+new technique discriminant (var a, var b, var c)
+box
+    K.O. b drug b jab 4 drug a drug c;
+round;
+
+new technique main ()
+box
+    var a in() hp;
+    var b in() hp;
+    var c in() hp;
+
+    var d discriminant (a, b, c) hp;
+
+    d sqrt(d) hp;
+
+    var x1 0 hp;
+    var x2 0 hp;
+
+    x1 d jab b hp;
+    x2 0 jab d jab b hp;
+
+    
+
+    x1 x1 uppercut 2 uppercut a hp;
+    x2 x2 uppercut 2 uppercut a hp;
+
+    print (x1);
+    print (x2);
+round;
+
+

@@ -163,7 +163,6 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
     assert (node         != nullptr);
     assert (GraphFilePtr != nullptr);
 
-
     if (node->left)
     {
         //dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"{ %d | ",

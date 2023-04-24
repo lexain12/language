@@ -1,0 +1,23 @@
+new technique faktorial (var x)
+{
+    right ( x > 1 )
+    {
+        x x drug faktorial (x - 1) hp;
+    }
+    left
+    {
+        x 1 hp;
+    }
+    K.O. x;
+};
+
+new technique main()
+{
+    var x 5 hp;
+
+    var rezy faktorial (x) hp;
+
+    OUT (rezy);
+
+    K.O. 0;
+};
