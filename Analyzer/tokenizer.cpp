@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <cstring>
 #include <stdio.h>
+#include <cstdlib>
 #include "../common.h"
 #include "analyzer.h"
 
@@ -15,15 +16,15 @@ void getBOpToken (Node*** tokenArray, char** string)
         case '+':
             **tokenArray = ADD (nullptr, nullptr);
             break;
-        
+
         case '-':
             **tokenArray = SUB (nullptr, nullptr);
             break;
-        
+
         case '*':
             **tokenArray = MUL (nullptr, nullptr);
             break;
-        
+
         case '/':
             **tokenArray = DIV (nullptr, nullptr);
             break;
@@ -35,7 +36,7 @@ void getBOpToken (Node*** tokenArray, char** string)
         case ')':
             **tokenArray = RBR();
             break;
-        
+
         case '^':
             **tokenArray = POW (nullptr, nullptr);
             break;
@@ -46,7 +47,7 @@ void getBOpToken (Node*** tokenArray, char** string)
         case ',':
             **tokenArray = COM ();
             break;
-        
+
         case '<':
             **tokenArray = BLW (nullptr, nullptr);
             break;
@@ -157,7 +158,7 @@ void getOpOrWordToken (Node*** tokenArray, char** string, Utility utils)
         **tokenArray = FRB();
         *tokenArray += 1;
     }
-    else 
+    else
     {
         char*  data = (char*) calloc (MAXDATASIZE, sizeof(*data));
         int numOfScan = 0;
@@ -301,5 +302,5 @@ Name* tableAdd (char* name, Name* table)
         assert (0);
         return nullptr;
     }
-    
+
 }

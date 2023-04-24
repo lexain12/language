@@ -15,8 +15,8 @@ const char   GraphFile[20] = "GraphFile.txt";
 
 size_t fileSize (FILE* file)
 {
-    fseek(file, 0l, SEEK_END); 
-    size_t size = (size_t) ftell(file); 
+    fseek(file, 0l, SEEK_END);
+    size_t size = (size_t) ftell(file);
     fseek(file, 0l, SEEK_SET);
 
     return size;
@@ -32,10 +32,10 @@ int readFile(FILE* openedFile, char** dest)
 
     *dest = (char*) calloc(numberOfChars + 1, sizeof(char));
 
-    size_t charsReaded = fread((void*) *dest, sizeof(char), numberOfChars, openedFile); // 
+    size_t charsReaded = fread((void*) *dest, sizeof(char), numberOfChars, openedFile); //
     if (charsReaded != numberOfChars)
         return readingError;
-    
+
     return 0;
 }
 
@@ -43,8 +43,8 @@ int textToStr(char* text, size_t* numberOfLines)
 {
     ASSERT(text != nullptr);
 
-    size_t i = 0; 
-    for (; text[i] != '\0'; i++) 
+    size_t i = 0;
+    for (; text[i] != '\0'; i++)
     {
         if (text[i] == '\n')
         {
@@ -52,7 +52,7 @@ int textToStr(char* text, size_t* numberOfLines)
             text[i] = '\0';
         }
     }
-    
+
     text[i] = '\n';
 //    fprintf(stderr, "number of lines = %lu\n", *numberOfLines);
 
@@ -63,8 +63,8 @@ int strToText(char* text, size_t* numberOfLines)
 {
     ASSERT(text != nullptr);
 
-    size_t i = 0; 
-    for (; text[i] != '\n'; i++) 
+    size_t i = 0;
+    for (; text[i] != '\n'; i++)
     {
         if (text[i] == '\0')
         {
@@ -72,7 +72,7 @@ int strToText(char* text, size_t* numberOfLines)
             text[i] = '\n';
         }
     }
-    
+
     text[i] = '\0';
 //    fprintf(stderr, "number of lines = %lu\n", *numberOfLines);
 
@@ -82,7 +82,7 @@ int strToText(char* text, size_t* numberOfLines)
 int splitIntoLines(InputFile *inputFile)
 {
     ASSERT(inputFile != nullptr);
-   
+
     char *text           =  inputFile->text;
     size_t numberOfLines =  inputFile->numberOfLines;
     Line **Lines         = &inputFile->arrayOfLines;
@@ -92,7 +92,7 @@ int splitIntoLines(InputFile *inputFile)
     *Lines = (Line*) calloc(numberOfLines, sizeof(Line));
     Line* arrayOfLines = *Lines;
     ASSERT(arrayOfLines != NULL);
-    
+
     size_t line = 0;
 
 //    fprintf(stderr, "%s", ((inputFile->arrayOfLines)[line]).charArray);
@@ -108,34 +108,34 @@ int splitIntoLines(InputFile *inputFile)
         if (text[i] == '\0')
         {
 //           fprintf(stderr, "line number is %lu\n", line);
-           
+
            arrayOfLines[line - 1].length    = (size_t) (&(text)[i] - arrayOfLines[line - 1].charArray);
            arrayOfLines[line]    .charArray = &(text)[i + 1];
-           
-        // fprintf(stderr, "%s\n", ((arrayOfLines)[line]).charArray);           
+
+        // fprintf(stderr, "%s\n", ((arrayOfLines)[line]).charArray);
  //          fprintf(stderr, "length = %lu\n", arrayOfLines[line - 1].length);
-           
+
            line++;
         }
     }
 
     arrayOfLines[line - 1].length = (size_t) (&text[i] - arrayOfLines[line - 1].charArray);
-   
+
 //    fprintf(stderr, "line number is %lu\n", line);
-    
+
     return 0;
 }
 
 int readFileToLinesStruct(FILE* openedFile, InputFile* inputFile)
 {
     ASSERT(openedFile != nullptr);
-    
+
     readFile(openedFile, &(inputFile->text));
     char* text = inputFile->text;
     textToStr(inputFile->text, &(inputFile->numberOfLines));
     splitIntoLines(inputFile);
     strToText (inputFile->text, &(inputFile->numberOfLines));
-    
+
     return 0;
 }
 
@@ -143,18 +143,18 @@ void treeDump (Node* node, const char* str, ...)
 {
     fprintf(LOGFILEPTR, "<hr>\n");
 
-    va_list argPtr = nullptr;
+    va_list argPtr = {};
     va_start (argPtr, str);
 
     fprintf (LOGFILEPTR, "<h2>");
     vfprintf (LOGFILEPTR, str, argPtr);
     fprintf (LOGFILEPTR, "</h2>\n");
-    
+
     makeGraph (node);
     static int picVersion = 0;
     fprintf (LOGFILEPTR, "<img src = \"src/pic%d.svg\"/>\n", picVersion++);
 
-    return; 
+    return;
 }
 
 #define dumpprint(...) fprintf(GraphFilePtr, __VA_ARGS__);
@@ -172,12 +172,12 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
 
         switch (node->left->type)
         {
-            case OP_t: 
+            case OP_t:
                 dumpprint ("%s }\", fillcolor=\"#ffc0c0\" ", FullOpArray1[node->left->opValue - 1]);
                 break;
 
-            case Num_t: 
-                dumpprint ("%lg}\", fillcolor=\"#c0ffc0\" ", node->left->numValue); 
+            case Num_t:
+                dumpprint ("%lg}\", fillcolor=\"#c0ffc0\" ", node->left->numValue);
                 break;
 
             case Var_t:
@@ -218,12 +218,12 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
 
         switch (node->right->type)
         {
-            case OP_t: 
+            case OP_t:
                 dumpprint ("\'%c\' }", FullOpArray1[node->right->opValue - 1]);
                 break;
 
-            case Num_t: 
-                dumpprint ("%lg }", node->right->numValue); 
+            case Num_t:
+                dumpprint ("%lg }", node->right->numValue);
                 break;
 
             case Var_t:
@@ -277,17 +277,17 @@ void makeGraph (Node* node)
                 node, node->type);
         dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"{ %d | ",
                     node, node->type);
-        
+
         switch (node->type)
         {
-            case OP_t: 
+            case OP_t:
                 dumpprint ("%s}", FullOpArray1[node->opValue - 1]);
                 break;
 
-            case Num_t: 
-                dumpprint ("%lg }", node->numValue); 
+            case Num_t:
+                dumpprint ("%lg }", node->numValue);
                 break;
-            
+
             case Var_t:
                 dumpprint ("%s }", node->var.varName);
                 break;
@@ -342,9 +342,9 @@ void makeGraph (Node* node)
 //Status printOrig(FILE* fileToPrint, char* buf)
 //{
 //    size_t i = 0;
-//    for (;buf[i] != '\n'; i++) 
+//    for (;buf[i] != '\n'; i++)
 //    {
-//        if (buf[i] == '\0') 
+//        if (buf[i] == '\0')
 //        {
 //            buf[i] = '\n';
 //        }

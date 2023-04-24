@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <cstdlib>
 #include <stdio.h>
 const size_t MAXCMDSIZE    = 100;
 extern const size_t NUMOFNAMES;
@@ -43,26 +44,26 @@ enum Type
     BuiltIn_t = 6,
 };
 
-enum VarType 
+enum VarType
 {
     global = 1,
     local  = 2,
 };
 
-struct Var 
+struct Var
 {
     char* varName;
     VarType varType;
 };
 
-enum NameType 
+enum NameType
 {
     KEY_TYPE  = 1,
     VAR_TYPE  = 2,
     FUNC_TYPE = 3,
 };
 
-struct Node 
+struct Node
 {
     Type   type;
     OP     opValue;

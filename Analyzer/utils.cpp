@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdlib>
 #include "../common.h"
 #include "analyzer.h"
 
@@ -43,7 +44,7 @@ Node* createNode (Type type, OP opValue, double numValue, char* varName, char* N
     newNode->Name         = Name;
     newNode->var.varName  = varName;
     newNode->opValue      = opValue;
-    
+
     return newNode;
 }
 
