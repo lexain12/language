@@ -1,0 +1,22 @@
+new technique main () 
+{
+    var gerr 5 hp;
+    var rezy 0 hp;
+     rezy  faktorial ( gerr ) hp;
+    OUT (rezy);
+    K.O. 0;
+};
+new technique faktorial (var gerrik ) 
+{
+    var rez 1 hp;
+    right ( gerrik  > 1)
+    {
+     rez  faktorial ( gerrik  jab 1) drug  gerrik  hp;
+    }
+    left 
+    {
+     rez 1 hp;
+    }
+
+    K.O.  rez ;
+};

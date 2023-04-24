@@ -163,7 +163,6 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
     assert (node         != nullptr);
     assert (GraphFilePtr != nullptr);
 
-
     if (node->left)
     {
         //dumpprint ("    nd%p [fillcolor=\"#54e3c2\", label=\"{ %d | ",
@@ -219,7 +218,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
         switch (node->right->type)
         {
             case OP_t: 
-                dumpprint ("\'%c\' }", FullOpArray1[node->right->opValue - 1]);
+                dumpprint ("\'%s\' }", FullOpArray1[node->right->opValue - 1]);
                 break;
 
             case Num_t: 

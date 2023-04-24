@@ -98,11 +98,11 @@ Node* getP (Utility* utils)
         assert ((**(utils->tokenArray)).opValue == OP_RBR);
         utils->tokenArray += 1;
     }
-    else if (val = getVar (utils)) {}
+    else if ((val = getVar (utils))) {}
 
-    else if (val = getN (utils)) {}
+    else if ((val = getN (utils))) {}
 
-    else if (val = getFunction (utils)) {}
+    else if ((val = getFunction (utils))) {}
 
     return val;
 }
@@ -247,7 +247,7 @@ Node* getFunction (Utility* utils)
                 Node* curNode = val->right;
                 Node* newNode = nullptr;
 
-                while (newNode = getStatement (utils))
+                while ((newNode = getStatement (utils)))
                 {
                     curNode->right = ST(newNode, nullptr);
                     curNode = curNode->right;
@@ -270,7 +270,7 @@ Node* getFunction (Utility* utils)
         char* tokenName = (**(utils->tokenArray)).Name;
         Name* curName = nullptr;
 
-        if (curName = findInTable (tokenName, utils->nameTable.data))
+        if ((curName = findInTable (tokenName, utils->nameTable.data)))
         {
             if (curName->type == FUNC_TYPE)
             {
@@ -375,7 +375,7 @@ Node* getStatement (Utility* utils)
 
     Node *val = nullptr;
 
-    if (val = getVar (utils))
+    if ((val = getVar (utils)))
     {
 
         val = EQ(val, getE (utils));
@@ -395,7 +395,7 @@ Node* getStatement (Utility* utils)
         return val;
     }
 
-    else if (val = getE (utils))
+    else if ((val = getE (utils)))
     {
 
         if ((**(utils->tokenArray)).type == OP_t)
@@ -493,7 +493,7 @@ Node* getStatement (Utility* utils)
                 Node* curNode = val->right;
                 Node* newNode = nullptr;
 
-                while (newNode = getStatement (utils))
+               while ((newNode = getStatement (utils)))
                 {
                     curNode->right = ST(newNode, nullptr);
                     curNode = curNode->right;
@@ -539,7 +539,7 @@ Node* getStatement (Utility* utils)
                 Node* curNode = val->right;
                 Node* newNode = nullptr;
 
-                while (newNode = getStatement (utils))
+                while ((newNode = getStatement (utils)))
                 {
                     curNode->right = ST(newNode, nullptr);
                     curNode = curNode->right;
@@ -573,7 +573,7 @@ Node* getStatement (Utility* utils)
                         Node* curNode = elseNode->right;
                         Node* newNode = nullptr;
 
-                        while (newNode = getStatement (utils))
+                        while ((newNode = getStatement (utils)))
                         {
                             curNode->right = ST(newNode, nullptr);
                             curNode = curNode->right;
@@ -633,7 +633,7 @@ Node* getG (Utility* utils)
     Node* newNode = nullptr;
 
 
-    while (newNode = getStatement (utils))
+    while ((newNode = getStatement (utils)))
     {
         curNode->right = ST(newNode, nullptr);
         curNode = curNode->right;
