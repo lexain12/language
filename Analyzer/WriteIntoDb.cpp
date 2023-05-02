@@ -139,13 +139,22 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
                         curNode->var.varName = data;
                     }
                     else if (strcmp (data, "ADD") == 0)
+                    {
+                        printf ("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                         curNode = ADD(nullptr, nullptr);
+                    }
 
                     else if (strcmp (data, "MUL") == 0)
+                    {
+                        printf ("Muuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuul\n");
                         curNode = MUL(nullptr, nullptr);
+                    }
 
                     else if (strcmp (data, "SUB") == 0)
+                    {
+                        printf ("Suuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuub\n");
                         curNode = SUB(nullptr, nullptr);
+                    }
 
                     else if (strcmp (data, "DIV") == 0)
                         curNode = DIV(nullptr, nullptr);
@@ -217,8 +226,8 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type)
 
                     else
                     {
-                        assert(0);
                         printError ("UnknownName, %s", data);
+                        assert(0);
                     }
 
                     break;

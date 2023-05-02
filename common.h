@@ -9,7 +9,7 @@ enum OP
 {
     UnknownOp = 0,
     OP_ADD    = 1,
-    OP_SUB    = 2,
+    OP_SUB    = 2,  // skkpped on purpose to split
     OP_MUL    = 4,
     OP_DIV    = 5,
     OP_POW    = 6,
@@ -28,6 +28,9 @@ enum OP
     OP_ABV    = 19,
     OP_IN     = 20,
     OP_OUT    = 21,
+    OP_IF     = 22,
+    OP_RET    = 23,
+    OP_VAR    = 24,
 };
 
 extern const char* ShortOpArray;
