@@ -28,9 +28,12 @@ enum OP
     OP_ABV    = 19,
     OP_IN     = 20,
     OP_OUT    = 21,
+// This is extension for bin translator
     OP_IF     = 22,
     OP_RET    = 23,
     OP_VAR    = 24,
+    OP_JMP    = 25,
+
 };
 
 extern const char* ShortOpArray;
@@ -38,13 +41,14 @@ extern const char* FullOpArray[];
 
 enum Type
 {
-    Unknown = 0,
-    OP_t    = 1,
-    Var_t   = 2,
-    Num_t   = 3,
-    Key_t   = 4,
-    Func_t  = 5,
+    Unknown   = 0,
+    OP_t      = 1,
+    Var_t     = 2,
+    Num_t     = 3,
+    Key_t     = 4,
+    Func_t    = 5,
     BuiltIn_t = 6,
+    Pointer_t = 7,
 };
 
 enum VarType

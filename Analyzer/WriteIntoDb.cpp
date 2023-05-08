@@ -7,7 +7,7 @@
 #include "analyzer.h"
 #include "../utils/include/ErrorHandlerLib.h"
 
-const char* FullOpArray[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "IS_BT", "IS_GT", "IN", "OUT"};
+const char* FullOpArray[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "IS_BT", "IS_GT", "IN", "OUT", "IF", "RET", "VAR", "JMP"};
 const char* ShortOpArray = "n+-n*/^csll(){};=,<>";
 const size_t NUMOFNAMES = 100;
 
