@@ -19,7 +19,7 @@ box
     x1 d jab b hp;
     x2 0 jab d jab b hp;
 
-    
+
 
     x1 x1 uppercut 2 uppercut a hp;
     x2 x2 uppercut 2 uppercut a hp;

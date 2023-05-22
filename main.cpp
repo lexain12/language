@@ -41,7 +41,6 @@ int main()
     tree = getTreeFromStandart (standartFileName);
     treeDump (tree, "OH my fuckiing gooooood\n");
 
-    printf ("start parsing\n");
     parseSt (tree, &stk, 1, asmFile);
 
 

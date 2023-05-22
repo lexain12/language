@@ -1,3 +1,4 @@
+#include <cstdlib>
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
 #include <ctype.h>
@@ -7,7 +8,7 @@
 #include "analyzer.h"
 #include "../utils/include/ErrorHandlerLib.h"
 
-const char* FullOpArray[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "IS_BT", "IS_GT", "IN", "OUT", "IF", "RET", "VAR", "JMP"};
+const char* FullOpArray[] = {"None", "ADD", "SUB", "None", "MUL", "DIV", "POW", "COS", "SIN", "LOG", "LN", "(", ")", "{", "}", ";", "EQ", ",", "IS_BT", "IS_GT", "IN", "OUT", "IF", "RET", "VAR", "JMP", "PARIN", "PAROUT", "CALL"};
 const char* ShortOpArray = "n+-n*/^csll(){};=,<>";
 const size_t NUMOFNAMES = 100;
 
@@ -419,5 +420,6 @@ Node* getTreeFromStandart (const char* FileName)
     NameTable tableForParse = {};
     tableForParse.data = (Name*) calloc (NUMOFNAMES, sizeof(*(tableForParse.data)));
     Node* tree = treeParse (nullptr, langFile, &tableForParse, Unknown);
+    free (tableForParse.data);
     return tree;
 }

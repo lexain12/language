@@ -19,7 +19,7 @@ size_t fileSize (FILE* file)
     size_t size = (size_t) ftell(file);
     fseek(file, 0l, SEEK_SET);
 
-    return size;
+    return size - 1;
 }
 
 int readFile(FILE* openedFile, char** dest)

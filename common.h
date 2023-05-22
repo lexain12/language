@@ -1,9 +1,16 @@
-#pragma once
+#ifndef COMMON
+#define COMMON
 #include <cstddef>
 #include <cstdlib>
 #include <stdio.h>
 const size_t MAXCMDSIZE    = 100;
 extern const size_t NUMOFNAMES;
+
+struct Configuration
+{
+    size_t sizeOfScanf;
+    size_t sizeOfPrintf;
+};
 
 enum OP
 {
@@ -33,7 +40,9 @@ enum OP
     OP_RET    = 23,
     OP_VAR    = 24,
     OP_JMP    = 25,
-
+    OP_PARIN  = 26,
+    OP_PAROUT = 27,
+    OP_CALL   = 28,
 };
 
 extern const char* ShortOpArray;
@@ -85,7 +94,7 @@ struct Name
 {
     char* name;
     NameType type;
-    int position;
+    size_t position;
 };
 
 struct NameTable
@@ -112,4 +121,4 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type);
 Node* getTreeFromStandart (const char* FileName);
 Node* makeTreeStandartIn (Node* node);
 Node* makeTreeStandartOut (Node* node);
-
+#endif
