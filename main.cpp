@@ -12,14 +12,14 @@ const char* standartFileName = "DBFile.txt";
 
 int main()
 {
-    InputFile inputFile = {"example.txt"}; 
+    InputFile inputFile = {"example.txt"};
     FILE* asmFile = fopen ("asmMainFile.txt", "w");
     initAsmFile (asmFile);
 
     FILE* langFile = fopen ("DBFile.txt", "w");
     assert (langFile != nullptr);
-    
-    Utility utils = {}; 
+
+    Utility utils = {};
     Stack_t stk   = {};
     stackCtor (&stk, 10); // fix this
 
@@ -35,14 +35,12 @@ int main()
 
     tree = getG (&utils);
     treeDump (tree, "LOOK\n");
-    treeDump (tree, "LOOK\n");
     treePrint (tree, langFile);
     fclose (langFile);
 
     tree = getTreeFromStandart (standartFileName);
     treeDump (tree, "OH my fuckiing gooooood\n");
 
-    printf ("start parsing\n");
     parseSt (tree, &stk, 1, asmFile);
 
 

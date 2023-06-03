@@ -19,7 +19,7 @@ size_t fileSize (FILE* file)
     size_t size = (size_t) ftell(file);
     fseek(file, 0l, SEEK_SET);
 
-    return size;
+    return size - 1;
 }
 
 int readFile(FILE* openedFile, char** dest)
@@ -172,7 +172,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
         switch (node->left->type)
         {
             case OP_t:
-                dumpprint ("%s }\", fillcolor=\"#ffc0c0\" ", FullOpArray1[node->left->opValue - 1]);
+                dumpprint ("%s }\", fillcolor=\"#ffc0c0\" ", FullOpArray1[node->left->opValue]);
                 break;
 
             case Num_t:
@@ -196,7 +196,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
                 break;
 
             case BuiltIn_t:
-                dumpprint ("%s}\", fillcolor=\"#c0c0c0c\"", FullOpArray1[node->left->opValue - 1]);
+                dumpprint ("%s}\", fillcolor=\"#c0c0c0c\"", FullOpArray1[node->left->opValue]);
                 break;
 
             default:
@@ -218,7 +218,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
         switch (node->right->type)
         {
             case OP_t:
-                dumpprint ("\'%c\' }", FullOpArray1[node->right->opValue - 1]);
+                dumpprint ("\'%s\' }", FullOpArray1[node->right->opValue - 1]);
                 break;
 
             case Num_t:
@@ -242,7 +242,7 @@ void treeGraph (const Node* node, FILE* GraphFilePtr)
                 break;
 
             case BuiltIn_t:
-                dumpprint ("%s }", FullOpArray1[node->left->opValue - 1]);
+                dumpprint ("%s }", FullOpArray1[node->left->opValue]);
                 break;
 
             default:
@@ -280,7 +280,7 @@ void makeGraph (Node* node)
         switch (node->type)
         {
             case OP_t:
-                dumpprint ("%s}", FullOpArray1[node->opValue - 1]);
+                dumpprint ("%s}", FullOpArray1[node->opValue ]);
                 break;
 
             case Num_t:
@@ -304,7 +304,7 @@ void makeGraph (Node* node)
                 break;
 
             case BuiltIn_t:
-                dumpprint ("%s}", FullOpArray1[node->left->opValue - 1]);
+                dumpprint ("%s}", FullOpArray1[node->left->opValue ]);
                 break;
 
             default:

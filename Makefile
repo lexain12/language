@@ -54,3 +54,5 @@ sanitize:
 writing.o:
 	@$(CXX) $(CXXFLAGS) Analyzer/WriteIntoDb.cpp -c -o bin/writing.o
 
+clear:
+	rm bin/*.o

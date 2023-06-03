@@ -1,15 +1,22 @@
-#pragma once
+#ifndef COMMON
+#define COMMON
 #include <cstddef>
 #include <cstdlib>
 #include <stdio.h>
 const size_t MAXCMDSIZE    = 100;
 extern const size_t NUMOFNAMES;
 
+struct Configuration
+{
+    size_t sizeOfScanf;
+    size_t sizeOfPrintf;
+};
+
 enum OP
 {
     UnknownOp = 0,
     OP_ADD    = 1,
-    OP_SUB    = 2,
+    OP_SUB    = 2,  // skkpped on purpose to split
     OP_MUL    = 4,
     OP_DIV    = 5,
     OP_POW    = 6,
@@ -28,6 +35,14 @@ enum OP
     OP_ABV    = 19,
     OP_IN     = 20,
     OP_OUT    = 21,
+// This is extension for bin translator
+    OP_IF     = 22,
+    OP_RET    = 23,
+    OP_VAR    = 24,
+    OP_JMP    = 25,
+    OP_PARIN  = 26,
+    OP_PAROUT = 27,
+    OP_CALL   = 28,
 };
 
 extern const char* ShortOpArray;
@@ -35,13 +50,14 @@ extern const char* FullOpArray[];
 
 enum Type
 {
-    Unknown = 0,
-    OP_t    = 1,
-    Var_t   = 2,
-    Num_t   = 3,
-    Key_t   = 4,
-    Func_t  = 5,
+    Unknown   = 0,
+    OP_t      = 1,
+    Var_t     = 2,
+    Num_t     = 3,
+    Key_t     = 4,
+    Func_t    = 5,
     BuiltIn_t = 6,
+    Pointer_t = 7,
 };
 
 enum VarType
@@ -78,7 +94,7 @@ struct Name
 {
     char* name;
     NameType type;
-    int position;
+    size_t position;
 };
 
 struct NameTable
@@ -105,4 +121,4 @@ Node* treeParse (Node* node, FILE* DBFileptr, NameTable* nameTable, Type type);
 Node* getTreeFromStandart (const char* FileName);
 Node* makeTreeStandartIn (Node* node);
 Node* makeTreeStandartOut (Node* node);
-
+#endif
