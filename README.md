@@ -9,7 +9,7 @@
 
 <details>
 <summary>Пример дерева</summary>
-<img src="./src/pic0.svg">
+<img src="./src/example.svg">
 </details>
 
 ## Midleend
